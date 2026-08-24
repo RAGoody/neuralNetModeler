@@ -7,6 +7,7 @@ class file:
     fullPath = ""
     fileExists = False
     verbose = True
+
     def __init__(self, path, name):
         #sets our file path and tests for the existence of the file, setting an attribute and printing output.
         #returns the file's existence status.
@@ -22,8 +23,18 @@ class file:
     def setVerbose(self, verbose):
         self.verbose = verbose
         return True
+
     def doesFileExist(self):
         return self.fileExists
+
+    def readIntoList(self):
+        if self.fileExists == True:
+            with open(self.fullPath, 'r') as file:
+               byLine = [line.rstrip('\n') for line in file]
+            return byLine
+        else:
+            raise FileNotFoundError(f"File '{self.name}' does not exist.")  
+
     def read(self):
         #basic if file exists, then read the file and return.
         if self.fileExists == True:
@@ -31,6 +42,7 @@ class file:
                 return f.read()
         else:
             raise FileNotFoundError(f"File '{self.name}' does not exist.")  
+
     def write(self, data, overWrite=False, format='',headers=''):
         #handles writing data to the file.
         #does conversion of data types to specific formats.
@@ -46,8 +58,10 @@ class file:
 
                     if (self.verbose == True):
                         print(f"Writing data to file: {self.fullPath}")
+
                     if headers:
                         f.write(f"{headers}\n")
+
                     for row in data:
                         csvRow = ''.join(str(value) for value in row)
                         f.write(csvRow)
