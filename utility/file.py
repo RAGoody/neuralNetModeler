@@ -1,5 +1,6 @@
 # handles basic file operations
 import os
+import csv
 
 class file:
     name = ""
@@ -7,10 +8,14 @@ class file:
     fullPath = ""
     fileExists = False
     verbose = True
+    headerList = []
+    separateHeader = False
 
     def __init__(self, path, name):
-        #sets our file path and tests for the existence of the file, setting an attribute and printing output.
-        #returns the file's existence status.
+        """
+            sets our file path and tests for the existence of the file, setting an attribute and printing output.
+            returns the file's existence status.
+        """
         self.name = name
         self.path = path
         self.fullPath = os.path.join(self.path, self.name)
@@ -21,19 +26,42 @@ class file:
             print(f"File '{self.name}' exists.")
 
     def setVerbose(self, verbose):
+        """
+            Set our verbose debug on or off.
+        """
         self.verbose = verbose
         return True
 
     def doesFileExist(self):
         return self.fileExists
 
-    def readIntoList(self):
+    def getHeader(self):
+        return self.headerList
+
+    def readCSVIntoMatrix(self,separateHeader=True):
+        """
+            reads the file, by line, into a list.
+            Each element is one line, w/out the new line character.
+            parameters:
+                separateHeader<boolean> do we split off the first row as a header or not?
+        """
+        matrix = []
+        if separateHeader == True:
+            self.separatedHeader = True
+
         if self.fileExists == True:
             with open(self.fullPath, 'r') as file:
-               byLine = [line.rstrip('\n') for line in file]
-            return byLine
+                thisFile = csv.reader(file)
+
+                if (separateHeader == True):
+                    self.headerList = next(thisFile)
+
+                for row in thisFile:
+                    matrix.append(row)
+
+            return matrix
         else:
-            raise FileNotFoundError(f"File '{self.name}' does not exist.")  
+            raise FileNotFoundError(f"File '{self.name}' does not exist.")
 
     def read(self):
         #basic if file exists, then read the file and return.
@@ -44,12 +72,15 @@ class file:
             raise FileNotFoundError(f"File '{self.name}' does not exist.")  
 
     def write(self, data, overWrite=False, format='',headers=''):
-        #handles writing data to the file.
-        #does conversion of data types to specific formats.
-        #currently supports list -> csv.
+        """
+           handles writing data to the file.
+           does conversion of data types to specific formats.
+           currently supports list -> csv.
+        """
         if overWrite == True:
             with open(self.fullPath, 'w') as f:
                 f.write("")
+
         match format:
             case 'csv':
                 with open(self.fullPath, 'a') as f:
