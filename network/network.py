@@ -4,16 +4,24 @@ class network:
     debug = False
     layers = []
     layerCount = 0
+    bias = 0
     neuronsPerLayerCount = 0
-    data = []
+    matrix = []
+    matrixLoaded = False
     initialized = False
     processed = False
     processStarted = False
     activation = False
+    depthProcessed = 0
+    suggestedNeurons = 0
+    suggestedLayers = 0
+    processingLayer = 0 #which layer is currently processing.
 
-    def __init__(self,layerCount,neuronsPerLayerCount,activation,debug=False):
+    def __init__(self,debug=False):
         #initial setup
         self.debug = debug
+
+    def initialize(self,layerCount,neuronsPerLayerCount,activation):
         self.layerCount = layerCount
         self.neuronsPerLayerCount = neuronsPerLayerCount
         if (self.setActivation(activation) == True):
@@ -33,6 +41,23 @@ class network:
 
     def getActivation(self):
         return self.activation
+
+    def setBias(self,bias):
+        self.bias = bias
+
+    def getBias(self):
+        return self.bias
+
+    def featuresToIgnore(self,ignoreList):
+        """
+            If there are column features to ignore in our matrix, this is where we tell the network.
+        """
+        if (type(ignoreList) == list):
+            self.ignoreList = ignoreList
+        else:
+            self.ignoreList = [ignoreList]
+
+        return True
 
     def _isValidActivation(self,activation):
         match activation:
@@ -62,23 +87,75 @@ class network:
             return False
         print(self.layers[number])
 
+    def getSuggestedLayers(self):
+        return self.suggestedLayers
+
+    def getSuggestedNeurons(self):
+        return self.suggestedNeurons
+
     def iterateThroughEachNeuron(self,action='debug'):
         for x in range(self.layerCount):
             for y in range(self.neuronsPerLayerCount):
+                thisLayer = self.getLayer(x)
                 match action:
                     case 'debug':
-                        thisLayer = self.getLayer(x)
                         print(f"Iterating through layer {x}: {thisLayer}")
                         thisNeuron = thisLayer.getNeuron(y)
                         print(f"...displaying neuron {y} of layer {x}: {thisNeuron}")
+                    case 'setActivation':
+                        thisLayer.getNeuron(y).setActivation(self.activation)
+                    case 'setActAndBias':
+                        thisLayer.getNeuron(y).setActivation(self.activation)
+                        thisLayer.getNeuron(y).setBias(self.bias)
 
-    def process(self,data):
+
+    def setMatrix(self,matrix):
+        if (type(matrix) == 'utility.matrix.matrix'):
+            print("Network:analyzeInputData(): Parameter is not the right type of <matrix> for the network to operate.")
+            return False
+        else:
+            self.matrix = matrix
+            self.matrixLoaded = True
+            return True
+
+    def isMatrixLoaded(self):
+        return self.matrixLoaded
+
+    def getMatrixRow(self,matrix):
+        if (self.isMatrixLoaded == True):
+            a = 1
+            
+    def analyzeInputMatrix(self):
+        """
+            Reviews the included data, suggest a number of neurons and layers to process the data set.
+            Parameters:
+                data<matrix>
+            Returns:
+                <boolean>
+        """
+        #for thisLine in data:
+            #print(thisLine)
+        
+        self.suggestedLayers = 5
+        self.suggestedNeurons = self.matrix.getWidth()
+
+        return True
+
+    def process(self,iteration=0):
         """Send the dataset into the network for processing"""
         if (self.initialized == False):
             return False
         
         self.processStarted = True
-        return self.processedStarted
+
+        #pass data to layer 0
+        self.layers[0].setInput(self.matrix.getRowAsList(0))
+        self.layers[0].process()
+        
+
+        #then retreive outputs and pass into the next layer.
+
+        return True
 
     def hasProcessed(self):
         return self.processed
@@ -88,3 +165,13 @@ class network:
             self.initializeLayer(i,neuronsPerLayerCount,activation)
 
         self.initialized = True
+
+    def _iterateThroughNLayers(self,maxDepth=1):
+        depthCounter = 0
+        for x in range(self.layerCount):
+            for y in range(self.neuronsPerLayerCount):
+                thisLayer = self.getLayer(x)
+                print(f"Iterating through layer {x}: {thisLayer}")
+            depthCounter += 1
+            if (depthCounter == maxDepth):
+                break
