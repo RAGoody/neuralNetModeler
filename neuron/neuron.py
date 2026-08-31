@@ -9,7 +9,7 @@ class neuron:
     input = 0
     incomingConnections = 0
     outgoingConnections = 0
-    activation = 'relu'
+    activation = 'dud'
 
     def __init__(self):
         #whatever we need to initialize. Purposefully leaving neuron clueless to the outside world at init.
@@ -23,12 +23,12 @@ class neuron:
         return self.output
 
     def setActivation(self,activation):
-        if (self._isValidActivation == True):
+        if (self._isValidActivation(activation) == True):
             self.activation = activation
             self._generateWeights()
             return True
         else:
-            return False
+            raise ValueError (f"Invalid activation: '{activation}'. Use 'relu','sigmouid', or 'tanh'")
 
     def setConnections(self,connections):
         self.incomingConnections = connections
@@ -46,6 +46,36 @@ class neuron:
     def getActivation(self):
         return self.activation
 
+    def calculate(self):
+        """
+            Processes input based upon selected activation function.
+            Returns False if invalid activation function selected.
+        """
+        #TODO: NEED TYPE HANDLING WHEN READING THE CSV
+        total = 0
+
+        for i in range(self.incomingConnections):
+            total += float(self.input[i]) * self.weights[i]
+
+        match self.activation :
+            case 'relu' :
+                total += self.bias
+                if (total > 0) :
+                    self.output = total
+                else:
+                    self.output = 0
+            case 'sigmoid':
+                self.output = np.where(total >= 0, 
+                    1 / (1 + np.exp(-self.input)), 
+                    np.exp(total) / (1 + np.exp(total))) + self.bias
+            case 'tanh' :
+                self.output = np.tanh(np.array([self.input])) + self.bias
+            case 'softmax' :
+                #TODO : not operable at the moment.
+                self.output = total
+
+        return self.output
+    
     def _isValidActivation(self,activation):
         """
            Is this a valid activation function type?
@@ -63,7 +93,7 @@ class neuron:
         match self.activation:
             case 'relu':
                 # He Initilization for ReLU
-                self.weights = [random.gauss(0,1) * math.sqrt(2.0 / self.connections) for i in range(self.incomingConnections) ]
+                self.weights = [random.gauss(0,1) * math.sqrt(2.0 / self.incomingConnections) for i in range(self.incomingConnections) ]
                 return True
             case 'sigmoid' | 'tanh':
                 #Xavier uniform 
@@ -77,27 +107,31 @@ class neuron:
             case _:
                 return False
 
-    def calculate(self):
-        """
-            Processes input based upon selected activation function.
-            Returns False if invalid activation function selected.
-        """
+    def _cleanValue(self,value):
+        useTemp = False
+        match value.lower(): #Are ya a boolean disguised as a silly string!?
+            case 'true': 
+                return True #now go away or I shall taunt you-ah ah second time-ah
+            case 'false':
+                return False #now go away or I shall taunt you-ah ah second time-ah
+        
+        try: #Are you an integer??
+            temp = int(value) 
+            useTemp = True #Yes? a hopeful true, to be overridden in the except on a bad attempt.
+        except: 
+            useTemp = False #No! Not really an integer.
 
-        #TODO: NEED TYPE HANDLING WHEN READING THE CSV
+        if (useTemp == True):
+            return temp #off the bridge you go!
+            
+        try: #Arrrrre you a floater??
+            temp = float(value)
+            useTemp = True #Yes? a hopeful true, to be overridden in the except on a bad attempt.
+        except:
+            useTemp = False #No! Not really a floater.
 
-        match self.activation :
-            case 'relu' :
-                if (self.input > 0) :
-                    self.output = self.input + self.bias
-                else:
-                    self.output = 0
-            case 'sigmoid':
-                self.output = np.where(self.input >= 0, 
-                    1 / (1 + np.exp(-self.input)), 
-                    np.exp(self.input) / (1 + np.exp(self.input))) + self.bias
-            case 'tanh' :
-                self.output = np.tanh(np.array([self.input])) + self.bias
-            case 'softmax' :
-                self.output = self.input
+        if (useTemp == True):
+            return temp #off the bridge you go!
 
-        return self.output
+        #Failing the type conversions to boolean, int, & float, then just return the parameter. It's probably a string.
+        return value
