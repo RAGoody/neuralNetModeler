@@ -1,6 +1,7 @@
 # handles basic file operations
 import os
 import csv
+import sys
 
 class file:
     name = ""
@@ -10,6 +11,9 @@ class file:
     verbose = True
     headerList = []
     separateHeader = False
+    ignoreSomeColumns = False
+    ignoreThese = []
+    ignoreLength = 0
 
     def __init__(self, path, name):
         """
@@ -38,6 +42,14 @@ class file:
     def getHeader(self):
         return self.headerList
 
+    def setColumnsToIngore(self,ignore=[]):
+        """
+            Expecting these as a numbered column starting with zero
+        """
+        self.ignoreSomeColumns = True
+        self.ignoreLength = len(ignore)
+        self.ignoreThese = ignore
+
     def readCSVIntoMatrix(self,separateHeader=True):
         """
             reads the file, by line, into a list.
@@ -45,23 +57,45 @@ class file:
             parameters:
                 separateHeader<boolean> do we split off the first row as a header or not?
         """
+        counter = 0
         matrix = []
         if separateHeader == True:
             self.separatedHeader = True
 
-        if self.fileExists == True:
+        if (self.fileExists == True):
             with open(self.fullPath, 'r') as file:
-                thisFile = csv.reader(file)
+                if (self.separatedHeader == True):
+                    header = file.readline()
+                    header = header.strip()
+                    header = header.split(',')
+                    if (self.ignoreSomeColumns == True):
+                        header = self._stripColumns(header)
+                    self.headerList = header
+            
+                for line in file:
+                    line = line.strip()
+                    line = line.split(',')
+                    if (self.ignoreSomeColumns == True):
+                        line = self._stripColumns(line)
 
-                if (separateHeader == True):
-                    self.headerList = next(thisFile)
-
-                for row in thisFile:
-                    matrix.append(row)
-
-            return matrix
+                    matrix.append(line)
+                    counter += 1
         else:
             raise FileNotFoundError(f"File '{self.name}' does not exist.")
+
+        return matrix
+
+    def _stripColumns(self,listToClean):
+        offSet = 0
+        for i in range(self.ignoreLength):
+            thisColToStrip = self.ignoreThese[i]
+            #Once you delete the first time, the resulting List is shrunk by one.
+            #So we need to reduce our column list by however many times we've deleted a column.
+            thisColToStrip = thisColToStrip - offSet
+            offSet += 1
+            del listToClean[thisColToStrip]
+
+        return listToClean
 
     def read(self):
         #basic if file exists, then read the file and return.
