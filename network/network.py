@@ -16,6 +16,7 @@ class network:
     suggestedNeurons = 0
     suggestedLayers = 0
     processingLayer = 0 #which layer is currently processing.
+    trainingColumn = 0
 
     def __init__(self,debug=False):
         #initial setup
@@ -28,6 +29,9 @@ class network:
             self._createNet(layerCount,neuronsPerLayerCount,self.activation)
         else:
             raise TypeError (f"Neuron::isValidActivation: '{activation}' is not a valid activation. Valid inputs: 'relu','sigmoid','tanh','softmax'.")
+
+    def setTrainingColumn(self,columnNumber):
+        self.trainingColumn = columnNumber
 
     def setDebug(self,debug):
         self.debug = debug
@@ -159,6 +163,14 @@ class network:
                 if i > 0:
                     self.layers[i].setInput(priorOutput)
                     priorOutput = self.layers[i].process()
+
+            #TODO : add in output handling logic here. First version will inlude a probability calculation.
+            # 1 layer of a neuron configured for sigmoid that will take the output from the last layer of the network
+            # then calculate a probability for that row of matrix data.
+
+        #TODO: add in Loss calculation after processed comparing result versus the training data column.
+
+        #TODO: adjust bias and weights based on correctness.
 
         self.processed = True
         return True
