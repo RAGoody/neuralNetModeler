@@ -9,6 +9,7 @@ class layer:
     bias = []
     activation = 'relu'
     input = []
+    ouput = []
     inputSet = False
     incomingConnections = 0
     outgoingConnections = 0
@@ -40,12 +41,17 @@ class layer:
         return True
 
     def process(self):
-        outputs = []
+        output = []
+        #current iterative N Neurons
         for i in range(self.neuronsPerLayerCount):
-            self.neurons[i].setInput(self.activation)
-            outputs.append(self.neurons[i].calculate())
+            self.neurons[i].setInput(self.input)
+            output.append(self.neurons[i].calculate())
 
-        print(outputs)
+        self.output = output
+        if (self.debug == True):
+            print(f"Layer: {self.layer} has generated output: {self.output}")
+
+        return self.output
 
     def isInputSet(self):
         return self.inputSet
