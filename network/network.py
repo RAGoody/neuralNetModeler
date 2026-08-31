@@ -121,9 +121,9 @@ class network:
     def isMatrixLoaded(self):
         return self.matrixLoaded
 
-    def getMatrixRow(self,matrix):
+    def getMatrixRow(self,row):
         if (self.isMatrixLoaded == True):
-            a = 1
+            return self.matrix[row]
             
     def analyzeInputMatrix(self):
         """
@@ -148,13 +148,19 @@ class network:
         
         self.processStarted = True
 
-        #pass data to layer 0
-        self.layers[0].setInput(self.matrix.getRowAsList(0))
-        self.layers[0].process()
-        
+        matrixLength = self.matrix.getLength()
+        for row in range(matrixLength):
+            #pass data to layer 0.
+            self.layers[0].setInput(self.matrix.getRowAsList(row))
+            priorOutput = self.layers[0].process()
 
-        #then retreive outputs and pass into the next layer.
+            #move data forward through the network.
+            for i in range(self.layerCount):
+                if i > 0:
+                    self.layers[i].setInput(priorOutput)
+                    priorOutput = self.layers[i].process()
 
+        self.processed = True
         return True
 
     def hasProcessed(self):
