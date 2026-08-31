@@ -39,6 +39,12 @@ else:
 
 #read our data
 print(f"Reading input file: {inputFile.fullPath}")
+
+#TODO : update the colums to ignore to either CLI params for user inputs.
+if (parameters.getParameter('training') == True):
+    inputFile.setColumnsToIngore([0,1,10])  #columns 0 and 1 are lat/long and 10 is if there's a target present.
+else:
+    inputFile.setColumnsToIngore([0,1])  #columns 0 and 1 are lat/long and 10 is if there's a target present.
 data = inputFile.readCSVIntoMatrix(True)
 dataMatrix = matrix(data)
 neuralNetwork.setMatrix(dataMatrix)
