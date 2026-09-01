@@ -1,19 +1,26 @@
 import numpy as np
 import math
 import random
+import uuid
 
-class neuron:
-    weights = []
+class Neuron:
     bias = 0
     output = False
     input = 0
     incomingConnections = 0
     outgoingConnections = 0
     activation = 'dud'
+    id = ''
+
+    def __new__(cls, *args, **kwargs):
+        # Force the creation of a completely new object instance
+        instance = super().__new__(cls)
+        return instance 
 
     def __init__(self):
         #whatever we need to initialize. Purposefully leaving neuron clueless to the outside world at init.
-        a = 1
+        self.weights = []
+        self.id = uuid.uuid4()
 
     def setInput(self,input):
         #TODO: validation on input and understanding the type of input.
@@ -22,13 +29,16 @@ class neuron:
     def getOutput(self):
         return self.output
 
+    def getId(self):
+        return self.id
+
     def setActivation(self,activation):
         if (self._isValidActivation(activation) == True):
             self.activation = activation
             self._generateWeights()
             return True
         else:
-            raise ValueError (f"Invalid activation: '{activation}'. Use 'relu','sigmouid', or 'tanh'")
+            raise ValueError (f"Invalid activation: '{activation}'. Use 'relu','sigmoid', or 'tanh'")
 
     def setConnections(self,connections):
         self.incomingConnections = connections
@@ -51,10 +61,9 @@ class neuron:
             Processes input based upon selected activation function.
             Returns False if invalid activation function selected.
         """
-        #TODO: NEED TYPE HANDLING WHEN READING THE CSV
         total = 0
-
         for i in range(self.incomingConnections):
+            #print(f"{self.input[i]} ....... {self.weights[i]}")
             total += float(self.input[i]) * self.weights[i]
 
         match self.activation :
@@ -65,9 +74,14 @@ class neuron:
                 else:
                     self.output = 0
             case 'sigmoid':
-                self.output = np.where(total >= 0, 
-                    1 / (1 + np.exp(-self.input)), 
-                    np.exp(total) / (1 + np.exp(total))) + self.bias
+                if (total > 500):
+                    return 1
+                if (total < -500):
+                    return 0
+                
+                self.output = 1 / (1 + np.exp(-total)) + self.bias
+                #print(self.input)
+                #print(f"sigmoid: {self.output} ... {total}")
             case 'tanh' :
                 self.output = np.tanh(np.array([self.input])) + self.bias
             case 'softmax' :
@@ -81,7 +95,7 @@ class neuron:
            Is this a valid activation function type?
         """
         match activation:
-            case 'relu' | 'sigmouid' | 'tanh' | 'softmax':
+            case 'relu' | 'sigmoid' | 'tanh' | 'softmax':
                 return True
             case _ : 
                 raise TypeError (f"Neuron::isValidActivation: '{activation}' is not a valid activation. Valid inputs: 'relu','sigmoid','tanh','softmax'.")
@@ -98,8 +112,7 @@ class neuron:
             case 'sigmoid' | 'tanh':
                 #Xavier uniform 
                 limit = np.sqrt(6.0 / self.incomingConnections + self.outgoingConnections)
-                self.weights = [np.random.uniform(-limit, limit, size=(self.incomingConnections, self.outgoingConnections)) for i in range.self.incomingConnections]
-                return True
+                self.weights = np.random.uniform(-limit, limit, size=self.incomingConnections).tolist()
             case 'softmax':
                 #placeholder
                 b = 4
