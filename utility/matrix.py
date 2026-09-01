@@ -1,11 +1,11 @@
 class matrix:
     thisIsAMatrix = False
-    matrix = []
     length = 0
     width = 0
-    statistics = dict()
 
     def __init__(self,matrix):
+        self.matrix = []
+        self.statistics = dict()
         if (type(matrix) == list and len(matrix) > 0 and len(matrix[0]) > 0):
             self.matrix = matrix
             self.length = len(matrix)
@@ -44,4 +44,18 @@ class matrix:
         if (self.isMatrix == False):
             return False
 
-        #now generate statistics about this matrix.
+        #TODO: now generate statistics about this matrix.
+
+    def normalize(self):
+        """
+            Adjusts the matrix data so that it is normalized between 0 and 1 using min-max.
+        """
+        for column in range(self.width):
+            values = [float(row[column]) for row in self.matrix]
+            minVal = min(values)
+            maxVal = max(values)
+
+            if (minVal == maxVal):
+                continue
+            for row in self.matrix:
+                row[column] = (float(row[column]) - minVal) / (maxVal - minVal)
