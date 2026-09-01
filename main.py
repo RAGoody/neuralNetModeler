@@ -47,6 +47,7 @@ else:
     inputFile.setColumnsToIngore([0,1])  #columns 0 and 1 are lat/long and 10 is if there's a target present.
 data = inputFile.readCSVIntoMatrix(True)
 dataMatrix = matrix(data)
+dataMatrix.normalize()
 neuralNetwork.setMatrix(dataMatrix)
 
 #determine if we're using forced depth and neuron count, or if we're going to use what the object suggests.
@@ -71,5 +72,7 @@ else:
 activation = parameters.getParameter('activation')
 activation.lower()
 
+neuralNetwork.setOutputLayer(1,'sigmoid')
+#neuralNetwork.setIterationBreak(1)
 neuralNetwork.initialize(layerCount,neuronsPerLayerCount,activation)
 neuralNetwork.process()
