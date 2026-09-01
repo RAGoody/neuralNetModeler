@@ -1,8 +1,7 @@
-from layer.layer import layer
+from layer.layer import Layer
 
 class network:
     debug = False
-    layers = []
     layerCount = 0
     bias = 0
     neuronsPerLayerCount = 0
@@ -17,14 +16,26 @@ class network:
     suggestedLayers = 0
     processingLayer = 0 #which layer is currently processing.
     trainingColumn = 0
+    outputWidth = 0
+    outputActivation = ''
+    outputSet = False
+    id = ''
+    iterationBreak = -1
 
     def __init__(self,debug=False):
         #initial setup
         self.debug = debug
+        self.layers = []
 
     def initialize(self,layerCount,neuronsPerLayerCount,activation):
         self.layerCount = layerCount
         self.neuronsPerLayerCount = neuronsPerLayerCount
+
+        if (self.isOutputSet() == False):
+            if (self.debug == True):
+                print("No output layer parameters set. Please use Network.setOutputLayer(width<int>,activation<str>) before calling Network.initialize()")
+            return False
+
         if (self.setActivation(activation) == True):
             self._createNet(layerCount,neuronsPerLayerCount,self.activation)
         else:
@@ -32,6 +43,10 @@ class network:
 
     def setTrainingColumn(self,columnNumber):
         self.trainingColumn = columnNumber
+
+    def setIterationBreak(self,count):
+        # Is there a point we want to stop streaming data to review debug output?
+        self.iterationBreak = count
 
     def setDebug(self,debug):
         self.debug = debug
@@ -62,20 +77,6 @@ class network:
             self.ignoreList = [ignoreList]
 
         return True
-
-    def _isValidActivation(self,activation):
-        match activation:
-            case 'relu' | 'sigmoid' | 'tanh' | 'softmax':
-                print("valid activation")
-                return True
-            case _ :
-                return False
-
-    def initializeLayer(self,number,neuronsPerLayerCount,activation):
-        if (self.debug == True):
-            print(f"....Creating layer {number} with {neuronsPerLayerCount} neurons.")
-
-        self.layers.append(layer(number,neuronsPerLayerCount,activation,self.debug))
 
     def getLayer(self,number):
         if (number > len(self.layers)):
@@ -112,6 +113,14 @@ class network:
                         thisLayer.getNeuron(y).setActivation(self.activation)
                         thisLayer.getNeuron(y).setBias(self.bias)
 
+    def setOutputLayer(self,width,activation):
+        self.outputWidth = width
+        self.outputActivation = activation
+        self.outputSet = True
+        return True
+
+    def isOutputSet(self):
+        return self.outputSet
 
     def setMatrix(self,matrix):
         if (type(matrix) == 'utility.matrix.matrix'):
@@ -149,7 +158,7 @@ class network:
         """Send the dataset into the network for processing"""
         if (self.initialized == False):
             return False
-        
+     
         self.processStarted = True
 
         matrixLength = self.matrix.getLength()
@@ -163,6 +172,11 @@ class network:
                 if i > 0:
                     self.layers[i].setInput(priorOutput)
                     priorOutput = self.layers[i].process()
+
+            if (row == self.iterationBreak):
+                if (self.debug == True):
+                    print("Breaking!")
+                break
 
             #TODO : add in output handling logic here. First version will inlude a probability calculation.
             # 1 layer of a neuron configured for sigmoid that will take the output from the last layer of the network
@@ -180,9 +194,20 @@ class network:
     
     def _createNet(self,layerCount,neuronsPerLayerCount,activation):
         for i in range(layerCount):
-            self.initializeLayer(i,neuronsPerLayerCount,activation)
+            self._initializeLayer(i,neuronsPerLayerCount,activation)
+
+        #now set the output layer. This is always additive to the set # of layers
+        self._initializeLayer(layerCount,self.outputWidth,self.outputActivation)
+        self.layerCount = len(self.layers)
 
         self.initialized = True
+
+    def _initializeLayer(self,number,neuronsPerLayerCount,activation):
+        if (self.debug == True):
+            print(f"....Creating layer {number} with {neuronsPerLayerCount} neurons.")
+
+        self.layers.append(Layer(number,neuronsPerLayerCount,activation,self.debug))
+        print(self.layers[number].getId())
 
     def _iterateThroughNLayers(self,maxDepth=1):
         depthCounter = 0
@@ -193,3 +218,11 @@ class network:
             depthCounter += 1
             if (depthCounter == maxDepth):
                 break
+
+    def _isValidActivation(self,activation):
+        match activation:
+            case 'relu' | 'sigmoid' | 'tanh' | 'softmax':
+                print("valid activation")
+                return True
+            case _ :
+                return False
