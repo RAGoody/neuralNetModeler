@@ -51,6 +51,9 @@ class Layer:
         self.inputSet = True
         return True
 
+    def getOutput(self):
+        return self.output
+
     def process(self):
         output = []
         #current iterative N Neurons
