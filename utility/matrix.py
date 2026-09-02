@@ -1,4 +1,4 @@
-class matrix:
+class Matrix:
     thisIsAMatrix = False
     length = 0
     width = 0

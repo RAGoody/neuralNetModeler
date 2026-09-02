@@ -1,11 +1,10 @@
 from layer.layer import Layer
 
-class network:
+class Network:
     debug = False
     layerCount = 0
     bias = 0
     neuronsPerLayerCount = 0
-    matrix = []
     matrixLoaded = False
     initialized = False
     processed = False
@@ -19,13 +18,17 @@ class network:
     outputWidth = 0
     outputActivation = ''
     outputSet = False
+    lossSet = False
     id = ''
     iterationBreak = -1
 
     def __init__(self,debug=False):
         #initial setup
         self.debug = debug
-        self.layers = []
+        #these lists are initialized here here due to Python's object reference handling. Setting a List attribute will often tell Python,
+        #on subsequent initilizations, to create a pointer to the first object created rather than allocate new memory to a new object.
+        self.layers = [] #a list of our layers
+        self.matrix = [] #this ultimately becomes a Matrix object.
 
     def initialize(self,layerCount,neuronsPerLayerCount,activation):
         self.layerCount = layerCount
@@ -121,6 +124,9 @@ class network:
 
     def isOutputSet(self):
         return self.outputSet
+
+    def setLossFunction(self,type):
+        self.lossSet = True
 
     def setMatrix(self,matrix):
         if (type(matrix) == 'utility.matrix.matrix'):

@@ -8,7 +8,6 @@ class Neuron:
     output = False
     input = 0
     incomingConnections = 0
-    outgoingConnections = 0
     activation = 'dud'
     id = ''
 
@@ -42,7 +41,6 @@ class Neuron:
 
     def setConnections(self,connections):
         self.incomingConnections = connections
-        self.outgoingConnections = connections
 
     def getConnections(self):
         return self.connections
@@ -63,7 +61,6 @@ class Neuron:
         """
         total = 0
         for i in range(self.incomingConnections):
-            #print(f"{self.input[i]} ....... {self.weights[i]}")
             total += float(self.input[i]) * self.weights[i]
 
         match self.activation :
@@ -79,9 +76,7 @@ class Neuron:
                 if (total < -500):
                     return 0
                 
-                self.output = 1 / (1 + np.exp(-total)) + self.bias
-                #print(self.input)
-                #print(f"sigmoid: {self.output} ... {total}")
+                self.output = float(1 / (1 + np.exp(-total)) + self.bias)
             case 'tanh' :
                 self.output = np.tanh(np.array([self.input])) + self.bias
             case 'softmax' :
@@ -121,6 +116,8 @@ class Neuron:
                 return False
 
     def _cleanValue(self,value):
+        #TODO: assess this method is needed in neuron.
+        
         useTemp = False
         match value.lower(): #Are ya a boolean disguised as a silly string!?
             case 'true': 

@@ -2,7 +2,7 @@
 # initializes a cliParameters object
 import argparse
 
-class cli:
+class CLI:
     parameters = {}
 
     def __init__(self,parameters):
