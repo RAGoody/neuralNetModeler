@@ -1,4 +1,5 @@
 from layer.layer import Layer
+import math
 
 class Network:
     debug = False
@@ -15,6 +16,7 @@ class Network:
     suggestedLayers = 0
     processingLayer = 0 #which layer is currently processing.
     trainingColumn = 0
+    trainingMode = False
     outputWidth = 0
     outputActivation = ''
     outputSet = False
@@ -46,6 +48,8 @@ class Network:
 
     def setTrainingColumn(self,columnNumber):
         self.trainingColumn = columnNumber
+        self.trainingMode = True
+        self.trainingValues = []
 
     def setIterationBreak(self,count):
         # Is there a point we want to stop streaming data to review debug output?
@@ -120,14 +124,26 @@ class Network:
         self.outputWidth = width
         self.outputActivation = activation
         self.outputSet = True
+        match activation: #which loss fucntion we use is determined by what our output activation function is.
+            case 'relu':
+                self.setLossFunction('MSE')
+            case 'sigmoid':
+                self.setLossFunction('BCE')
+
         return True
 
     def isOutputSet(self):
         return self.outputSet
 
     def setLossFunction(self,type):
-        self.lossSet = True
-
+        match type :
+            case 'BCE' | 'MSE':
+                self.lossType = type
+                self.lossSet = True
+                return True
+            case _:
+                return False
+            
     def setMatrix(self,matrix):
         if (type(matrix) == 'utility.matrix.matrix'):
             print("Network:analyzeInputData(): Parameter is not the right type of <matrix> for the network to operate.")
@@ -151,12 +167,11 @@ class Network:
                 data<matrix>
             Returns:
                 <boolean>
-        """
-        #for thisLine in data:
-            #print(thisLine)
-        
+        """   
         self.suggestedLayers = 5
         self.suggestedNeurons = self.matrix.getWidth()
+        if (self.trainingMode == True):
+            self.suggestedNeurons -= 1  #make sure to reduce suggested neuron count by 1 since we expect a column to be our training reference.
 
         return True
 
@@ -170,7 +185,15 @@ class Network:
         matrixLength = self.matrix.getLength()
         for row in range(matrixLength):
             #pass data to layer 0.
-            self.layers[0].setInput(self.matrix.getRowAsList(row))
+            input = self.matrix.getRowAsList(row)
+
+            #handle training column
+            if (self.trainingMode == True):
+                trainingIndicator = input[self.trainingColumn] #save our training indicator for the loss function.
+                self.trainingValues.append(trainingIndicator)  #this becomes a list parallel to the length of self.matrix
+                del input[self.trainingColumn] #pop our training column out of the data.
+
+            self.layers[0].setInput(input)
             priorOutput = self.layers[0].process()
 
             #move data forward through the network.
@@ -184,20 +207,41 @@ class Network:
                     print("Breaking!")
                 break
 
-            #TODO : add in output handling logic here. First version will inlude a probability calculation.
-            # 1 layer of a neuron configured for sigmoid that will take the output from the last layer of the network
-            # then calculate a probability for that row of matrix data.
-
-        #TODO: add in Loss calculation after processed comparing result versus the training data column.
-
-        #TODO: adjust bias and weights based on correctness.
+            #calculate loss with our training indicator when in training mode.
+            if (self.trainingMode == True):
+                loss = self.processLoss(self.layers[self.layerCount-1].getOutput(),trainingIndicator)
+                #TODO: adjust bias and weights based on correctness
 
         self.processed = True
         return True
 
     def hasProcessed(self):
         return self.processed
-    
+
+    def processLoss(self,output,indicator):
+        loss = []
+        outputLen = len(output)
+
+        for i in range(outputLen):
+            predictedProbability = output[i]
+            match self.lossType:
+                case 'BCE':
+                    #Binary Cross-Entropy. For use with Sigmoid.
+                    epsilon = 1e-15  #safety value to prevent crashes on .log
+                    probability = max(epsilon, min(1.0 - epsilon, predictedProbability)) #ensure prediction value to not break math
+                    thisLoss = (indicator * math.log(probability) + (1.0 - indicator) * math.log(1.0 - probability))
+                case 'MSE':
+                    #Mean Squared Error. For use with ReLU
+                    errorDifference = indicator - predictedProbability
+                    squaredError = errorDifference ** 2
+                    thisLoss = 0.5 * squaredError
+            loss.append(thisLoss)
+
+        if (self.debug == True):
+            print(f"....Loss for this layer: {loss} with training indicator of: {indicator}")
+
+        return loss
+
     def _createNet(self,layerCount,neuronsPerLayerCount,activation):
         for i in range(layerCount):
             self._initializeLayer(i,neuronsPerLayerCount,activation)
