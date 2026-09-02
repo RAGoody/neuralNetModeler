@@ -1,9 +1,8 @@
 # handles basic file operations
 import os
 import csv
-import sys
 
-class file:
+class File:
     name = ""
     path = ""
     fullPath = ""
