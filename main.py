@@ -14,41 +14,40 @@ CLI parameters:
 
 """
 
-from utility.file import file
-from utility.cli import cli
-from utility.matrix import matrix
-from network.network import network
+from utility.file import File
+from utility.cli import CLI
+from utility.matrix import Matrix
+from network.network import Network
 import sys
 from readchar import readkey, key
 
-parameters = cli(parameters=['input', 'output', 'activation', 'layers','neuronsperlayer','usesuggested','training','useconfig'])
+parameters = CLI(parameters=['input', 'output', 'activation', 'layers', 'neuronsperlayer', 'usesuggested', 'training', 'trainingcolumn', 'useconfig'])
 print(parameters.getParameters())
 
 #read our config - set aside for now in lieu of intaking parameters from the CLI
+#TODO: implement a Config class that reads stores a JSON configuration with User Parameters in it.
 
 #init our empty network with debug turned on.
-neuralNetwork = network(True)
+neuralNetwork = Network(True)
 neuralNetwork.featuresToIgnore([0,1])
 
 if (parameters.getParameter('training') == True):
-    inputFile = file(path="data/training",name=parameters.getParameter('input'))
+    inputFile = File(path="data/training",name=parameters.getParameter('input'))
     print("Training mode detected.")
 else:
-    inputFile = file(path="data/input", name=parameters.getParameter('input'))
+    inputFile = File(path="data/input", name=parameters.getParameter('input'))
     print("Predictive mode detected.")
 
 #read our data
 print(f"Reading input file: {inputFile.fullPath}")
 
-#TODO : update the colums to ignore to either CLI params for user inputs.
-if (parameters.getParameter('training') == True):
-    inputFile.setColumnsToIngore([0,1,10])  #columns 0 and 1 are lat/long and 10 is if there's a target present.
-else:
-    inputFile.setColumnsToIngore([0,1])  #columns 0 and 1 are lat/long and 10 is if there's a target present.
+inputFile.setColumnsToIngore([0,1])  #columns 0 and 1 are lat/long and 10 is if there's a target present.
 data = inputFile.readCSVIntoMatrix(True)
-dataMatrix = matrix(data)
+dataMatrix = Matrix(data)
 dataMatrix.normalize()
 neuralNetwork.setMatrix(dataMatrix)
+if (parameters.getParameter('training') == True):
+    neuralNetwork.setTrainingColumn(parameters.getParameter('trainingcolumn'))  #remember to account for any ignored columns.
 
 #determine if we're using forced depth and neuron count, or if we're going to use what the object suggests.
 if (parameters.getParameter('usesuggested') == True):
