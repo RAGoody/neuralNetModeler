@@ -106,7 +106,7 @@ class Neuron:
                 return True
             case 'sigmoid' | 'tanh':
                 #Xavier uniform 
-                limit = np.sqrt(6.0 / self.incomingConnections + self.outgoingConnections)
+                limit = np.sqrt(6.0 / self.incomingConnections + self.incomingConnections)
                 self.weights = np.random.uniform(-limit, limit, size=self.incomingConnections).tolist()
             case 'softmax':
                 #placeholder
@@ -117,7 +117,7 @@ class Neuron:
 
     def _cleanValue(self,value):
         #TODO: assess this method is needed in neuron.
-        
+
         useTemp = False
         match value.lower(): #Are ya a boolean disguised as a silly string!?
             case 'true': 
