@@ -21,7 +21,7 @@ from network.network import Network
 import sys
 from readchar import readkey, key
 
-parameters = CLI(parameters=['input', 'output', 'activation', 'layers', 'neuronsperlayer', 'usesuggested', 'training', 'trainingcolumn', 'useconfig'])
+parameters = CLI(parameters=['input', 'output', 'activation', 'layers', 'neuronsperlayer', 'usesuggested', 'training', 'trainingcolumn', 'learningrate', 'useconfig'])
 print(parameters.getParameters())
 
 #read our config - set aside for now in lieu of intaking parameters from the CLI
@@ -69,9 +69,28 @@ else:
     neuronsPerLayerCount = int(parameters.getParameter('nueronsperlayer'))
 
 activation = parameters.getParameter('activation')
-activation.lower()
-
 neuralNetwork.setOutputLayer(1,'sigmoid')
 #neuralNetwork.setIterationBreak(1)
 neuralNetwork.initialize(layerCount,neuronsPerLayerCount,activation)
+
+print(f"Network Initialized: {neuralNetwork}")
+print("Continue? Press 'enter' or 'escape' to quit.")
+key = readkey()
+if (key == "\x1b"):
+    print("exiting. Goodbye.")
+    print("")
+    sys.exit()
+else:
+    print("...Continuing.")
+
 neuralNetwork.process()
+
+print(f"Processing completed")
+print("Save state? Press 'enter' or 'escape' to quit.")
+key = readkey()
+if (key == "\x1b"):
+    print("exiting. Goodbye.")
+    print("")
+    sys.exit()
+else:
+    print("...Saving (not implemented).")
