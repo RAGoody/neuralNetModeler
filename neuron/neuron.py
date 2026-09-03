@@ -10,6 +10,8 @@ class Neuron:
     incomingConnections = 0
     activation = 'dud'
     id = ''
+    delta = 0
+    learningRate = 0.001
 
     def __new__(cls, *args, **kwargs):
         # Force the creation of a completely new object instance
@@ -19,6 +21,7 @@ class Neuron:
     def __init__(self):
         #whatever we need to initialize. Purposefully leaving neuron clueless to the outside world at init.
         self.weights = []
+        self.lastInput = []
         self.id = uuid.uuid4()
 
     def setInput(self,input):
@@ -30,6 +33,12 @@ class Neuron:
 
     def getId(self):
         return self.id
+
+    def setLearningRate(self,learningRate):
+        self.learningRate = learningRate
+
+    def getLearningRate(self):
+        return self.learningRate
 
     def setActivation(self,activation):
         if (self._isValidActivation(activation) == True):
@@ -43,7 +52,7 @@ class Neuron:
         self.incomingConnections = connections
 
     def getConnections(self):
-        return self.connections
+        return self.incomingConnections
 
     def setBias(self,bias):
         self.bias = bias
@@ -60,23 +69,25 @@ class Neuron:
             Returns False if invalid activation function selected.
         """
         total = 0
+        self.lastInput = self.input
         for i in range(self.incomingConnections):
             total += float(self.input[i]) * self.weights[i]
-
+      
         match self.activation :
             case 'relu' :
                 total += self.bias
                 if (total > 0) :
                     self.output = total
                 else:
-                    self.output = 0
+                    self.output = 0.01 * total
             case 'sigmoid':
+                total += self.bias
                 if (total > 500):
-                    return 1
-                if (total < -500):
-                    return 0
-                
-                self.output = float(1 / (1 + np.exp(-total)) + self.bias)
+                    self.output = 1
+                elif (total < -500):
+                    self.output = 0
+                else:                
+                    self.output = float(1 / (1 + np.exp(-total)))
             case 'tanh' :
                 self.output = np.tanh(np.array([self.input])) + self.bias
             case 'softmax' :
@@ -84,7 +95,50 @@ class Neuron:
                 self.output = total
 
         return self.output
-    
+
+    def learn(self,trainingIndicator,predictedProbability):
+        self.delta = predictedProbability - trainingIndicator
+        #print(f"            Neuron:learn() : delta: {self.delta}")
+        self.adjustWeights()
+        return self.delta
+
+    def getDelta(self):
+        return self.delta
+
+    def calculateHiddenDelta(self,delta,weight):
+        if (self.output > 0):
+            composite = delta * weight
+            self.delta = composite * 1.0
+        else:
+            self.delta = 0 * 0.01
+
+    def adjustWeights(self):
+        """
+            Adjusts the weights for each incoming feature based upon the learningRate * what the last input was for this neuron.
+        """
+        self.bias -= self.learningRate * self.delta
+
+        """
+        print ("...Neuron.adjustWeights() ==================================================")
+        print (f"{self.id}")
+        print (f"weights before: {self.weights}")
+        print (f"last inputs before: {self.lastInput}")
+        print (f"delta: {self.delta}")
+        print (f"learning: {self.learningRate}")
+        print (f"output: {self.output}")
+        print (f"activation: {self.activation}")
+        """
+        for i in range(self.incomingConnections):
+            self.weights[i] -= self.learningRate * self.delta * self.lastInput[i]
+
+        """
+        print (f"weights after: {self.weights}")
+        print ("==================================================")
+        """
+
+    def getSpecificWeight(self,index):
+        return self.weights[index]
+ 
     def _isValidActivation(self,activation):
         """
            Is this a valid activation function type?
@@ -106,7 +160,7 @@ class Neuron:
                 return True
             case 'sigmoid' | 'tanh':
                 #Xavier uniform 
-                limit = np.sqrt(6.0 / self.incomingConnections + self.incomingConnections)
+                limit = np.sqrt(6.0 / (self.incomingConnections + 1))
                 self.weights = np.random.uniform(-limit, limit, size=self.incomingConnections).tolist()
             case 'softmax':
                 #placeholder
