@@ -1,3 +1,5 @@
+from matplotlib.pylab import rint
+
 from layer.layer import Layer
 import math
 
@@ -23,6 +25,9 @@ class Network:
     lossSet = False
     id = ''
     iterationBreak = -1
+    epochs = 1
+    accuracyThreshold = 0.9
+    learningRate = 0.01 #just a default value.
 
     def __init__(self,debug=False):
         #initial setup
@@ -35,6 +40,7 @@ class Network:
     def initialize(self,layerCount,neuronsPerLayerCount,activation):
         self.layerCount = layerCount
         self.neuronsPerLayerCount = neuronsPerLayerCount
+        activation.lower()
 
         if (self.isOutputSet() == False):
             if (self.debug == True):
@@ -42,11 +48,15 @@ class Network:
             return False
 
         if (self.setActivation(activation) == True):
-            self._createNet(layerCount,neuronsPerLayerCount,self.activation)
+            self._createNet(layerCount,neuronsPerLayerCount,self.activation,self.learningRate)
         else:
             raise TypeError (f"Neuron::isValidActivation: '{activation}' is not a valid activation. Valid inputs: 'relu','sigmoid','tanh','softmax'.")
 
     def setTrainingColumn(self,columnNumber):
+        """
+            In training mode we need to know which column in our matrix is indicating the expected output for the training data. This is where we set that column number.
+            Also we initailize our boolean training mode to control processing behaviors and a list to hold the training indicators for each row of data.
+        """
         self.trainingColumn = columnNumber
         self.trainingMode = True
         self.trainingValues = []
@@ -54,6 +64,12 @@ class Network:
     def setIterationBreak(self,count):
         # Is there a point we want to stop streaming data to review debug output?
         self.iterationBreak = count
+
+    def setEpochs(self,epochs):
+        self.epochs = epochs
+
+    def setLearningRate(self,learningRate):
+        self.learningRate = learningRate
 
     def setDebug(self,debug):
         self.debug = debug
@@ -105,21 +121,6 @@ class Network:
     def getSuggestedNeurons(self):
         return self.suggestedNeurons
 
-    def iterateThroughEachNeuron(self,action='debug'):
-        for x in range(self.layerCount):
-            for y in range(self.neuronsPerLayerCount):
-                thisLayer = self.getLayer(x)
-                match action:
-                    case 'debug':
-                        print(f"Iterating through layer {x}: {thisLayer}")
-                        thisNeuron = thisLayer.getNeuron(y)
-                        print(f"...displaying neuron {y} of layer {x}: {thisNeuron}")
-                    case 'setActivation':
-                        thisLayer.getNeuron(y).setActivation(self.activation)
-                    case 'setActAndBias':
-                        thisLayer.getNeuron(y).setActivation(self.activation)
-                        thisLayer.getNeuron(y).setBias(self.bias)
-
     def setOutputLayer(self,width,activation):
         self.outputWidth = width
         self.outputActivation = activation
@@ -134,6 +135,9 @@ class Network:
 
     def isOutputSet(self):
         return self.outputSet
+
+    def setLearningRate(self,learningRate):
+        self.learningRate = learningRate
 
     def setLossFunction(self,type):
         match type :
@@ -168,7 +172,7 @@ class Network:
             Returns:
                 <boolean>
         """   
-        self.suggestedLayers = 5
+        self.suggestedLayers = 3
         self.suggestedNeurons = self.matrix.getWidth()
         if (self.trainingMode == True):
             self.suggestedNeurons -= 1  #make sure to reduce suggested neuron count by 1 since we expect a column to be our training reference.
@@ -179,41 +183,111 @@ class Network:
         """Send the dataset into the network for processing"""
         if (self.initialized == False):
             return False
-     
+
+        accuracyOverTimeList = []
         self.processStarted = True
-
         matrixLength = self.matrix.getLength()
-        for row in range(matrixLength):
-            #pass data to layer 0.
-            input = self.matrix.getRowAsList(row)
+        for i in range(self.epochs): #an epoch is how many times we will run our training dataset.
+            accuracyList = []
+            lossList = []
+            #TODO: test for a threshold of correct predictions & break once acheived.
+            if (self.debug == True):
+                print(f"Network:process(): Epoch {i+1} of {self.epochs}", end=" ")
 
-            #handle training column
-            if (self.trainingMode == True):
-                trainingIndicator = input[self.trainingColumn] #save our training indicator for the loss function.
-                self.trainingValues.append(trainingIndicator)  #this becomes a list parallel to the length of self.matrix
-                del input[self.trainingColumn] #pop our training column out of the data.
+            for row in range(matrixLength):
+                #if (self.debug == True):
+                    #print(".", end=" ")
+                
+                #pass data to layer 0.
+                input = self.matrix.getRowAsList(row)
+                #print(f"    Network:process() after getting row: {row} input: {input}")
 
-            self.layers[0].setInput(input)
-            priorOutput = self.layers[0].process()
+                #handle training column
+                if (self.trainingMode == True):
+                    trainingIndicator = input[self.trainingColumn] #save our training indicator for the loss function.
+                    self.trainingValues.append(trainingIndicator)  #this becomes a list parallel to the length of self.matrix
+                    del input[self.trainingColumn] #pop our training column out of the data.
 
-            #move data forward through the network.
-            for i in range(self.layerCount):
-                if i > 0:
-                    self.layers[i].setInput(priorOutput)
-                    priorOutput = self.layers[i].process()
+                #print(f"    2nd Network:process() after training column handling: input: {input}")
 
-            if (row == self.iterationBreak):
+                self.layers[0].setInput(input)
+                priorOutput = self.layers[0].process()
+                #print(f"    3rd Network:process(): after 0th layer process input: {priorOutput}")
+
+                #move data forward through the network.
+                for layerIndex in range(self.layerCount):
+                    if layerIndex > 0:
+                        temp = priorOutput
+                        #print(f"    Network:process(): before layer {layerIndex} processes")
+                        #print(f"        input{priorOutput}")
+                        self.layers[layerIndex].setInput(priorOutput)
+                        priorOutput = self.layers[layerIndex].process()
+                        #print(f"    after layer {layerIndex} processes")
+                        #print(f"        output{priorOutput}")
+
+                    #if (i == self.layerCount-1):
+                        #print(f"layer:process():sigmoidlayer input for this layer:{temp}")
+
+                #calculate loss with our training indicator when in training mode.
+                if (self.trainingMode == True):
+                    loss = self.processLoss(priorOutput,trainingIndicator)
+                    lossList.append(loss[0])
+                    if (trainingIndicator == 1):
+                        accuracy = trainingIndicator - priorOutput[0]
+                        accuracy = 1 - abs(accuracy)
+                        accuracyList.append(accuracy)
+
+                    #if (self.debug == True):
+                        #print(f"{self.layers[self.layerCount-1].getOutput()} vs. {priorOutput}")
+                        #print(f"        Loss for this layer: {loss} with training indicator of: {trainingIndicator} and last layer prediction: {priorOutput}")
+
+                    if (row > 0):
+                        self.layers[self.layerCount-1].learn(trainingIndicator,priorOutput)
+                        self.calculateHiddenErrors()
+
+                if (row == self.iterationBreak):
+                    if (self.debug == True):
+                        print(f"    Network:process():Breaking! at row {row}")
+                    break
+
+            if (self.debug == True):
+                print("")
+                
+            if (len(accuracyList) > 0):
+                averageAccuracy = sum(accuracyList) / len(accuracyList)
+                averageLoss = sum(lossList) / len(lossList)
                 if (self.debug == True):
-                    print("Breaking!")
-                break
+                    print(f"    Network:process(): Average Accuracy for Epoch {i+1}: {averageAccuracy}")
+                    print(f"    Network:process(): Average Loss for Epoch {i+1}: {averageLoss}")
 
-            #calculate loss with our training indicator when in training mode.
-            if (self.trainingMode == True):
-                loss = self.processLoss(self.layers[self.layerCount-1].getOutput(),trainingIndicator)
-                #TODO: adjust bias and weights based on correctness
+                accuracyOverTimeList.append(averageAccuracy)
+                if (averageAccuracy >= self.accuracyThreshold and self.trainingMode == True):
+                    if (self.debug == True):
+                        print(f"Network:process(): Average Accuracy of {averageAccuracy} has met or exceeded threshold of {self.accuracyThreshold}. Breaking training loop.")
+                    break
 
         self.processed = True
+        if (self.debug == True):
+            print(f"Network:process(): Average Accuracy over all epochs: {sum(accuracyOverTimeList) / len(accuracyOverTimeList)}")
+
         return True
+
+    def calculateHiddenErrors(self):
+        """
+            Since Network is the only object aware of multiple layers and the output, it will need to orchestrate each layer calculating 
+            its neurons delta from the subsequenct layer.
+            I COULD just straight-up iterate through each neuron in two sets but I'd break my encapsulation.
+        """
+        #print("......Network:calculateHiddenErrors()")
+        for layerIndex in reversed(range(self.layerCount)):
+            nextLayerIndex = layerIndex - 1
+            if (nextLayerIndex > 0):
+                #lets grab our bottom-most layer in the iteration.
+                closestToBottomLayer = self.layers[layerIndex]
+                #now grab the next layer up in the network.
+                closestToTopLayer = self.layers[nextLayerIndex]
+                #each neuron in the next up layer needs to calculate how off down-stream calculations were because of it.
+                closestToTopLayer.calculateErrors(closestToBottomLayer)
 
     def hasProcessed(self):
         return self.processed
@@ -229,35 +303,53 @@ class Network:
                     #Binary Cross-Entropy. For use with Sigmoid.
                     epsilon = 1e-15  #safety value to prevent crashes on .log
                     probability = max(epsilon, min(1.0 - epsilon, predictedProbability)) #ensure prediction value to not break math
-                    thisLoss = (indicator * math.log(probability) + (1.0 - indicator) * math.log(1.0 - probability))
+                    thisLoss = -(indicator * math.log(probability) + (1.0 - indicator) * math.log(1.0 - probability))
                 case 'MSE':
                     #Mean Squared Error. For use with ReLU
-                    errorDifference = indicator - predictedProbability
+                    errorDifference = predictedProbability - indicator
                     squaredError = errorDifference ** 2
                     thisLoss = 0.5 * squaredError
             loss.append(thisLoss)
 
-        if (self.debug == True):
-            print(f"....Loss for this layer: {loss} with training indicator of: {indicator}")
-
+        #print(f"thisoutput: {output} thisLoss: {loss}")
         return loss
 
-    def _createNet(self,layerCount,neuronsPerLayerCount,activation):
+    def _createNet(self,layerCount,neuronsPerLayerCount,activation,learningRate):
+        """
+            Orchestrates creating the whole net. Uses parameters to build the incoming and hidden layers.
+            Uses separate attributes self.outputWidth & self.outputActivation to build the output layer.
+            Parameters:
+                layerCount: <int> how many layers to build.
+                neuronsPerLayerCount <int> how many neurons are in this layer
+                activation <str> which activation function are we using in this layer?
+                learningRate <float> the amount of adjustment we want this layer to change its weights by.
+        """
         for i in range(layerCount):
-            self._initializeLayer(i,neuronsPerLayerCount,activation)
+            self._initializeLayer(i,neuronsPerLayerCount,neuronsPerLayerCount,activation,learningRate)
 
         #now set the output layer. This is always additive to the set # of layers
-        self._initializeLayer(layerCount,self.outputWidth,self.outputActivation)
+        self._initializeLayer(layerCount,self.outputWidth,neuronsPerLayerCount,self.outputActivation,learningRate)
         self.layerCount = len(self.layers)
-
         self.initialized = True
 
-    def _initializeLayer(self,number,neuronsPerLayerCount,activation):
+    def _initializeLayer(self,number,neuronsPerLayerCount,incomingConnections,activation,learningRate):
+        """
+            initializes a single layer & updates our layer list attribute with the new layer.
+            Parameters:
+                number: <int> what layer this is.
+                neuronsPerLayerCount <int> how many neurons are in this layer
+                incomingConnections <int> how many connections are coming into this layer or how many features are we processing
+                activation <str> which activation function are we using in this layer?
+                learningRate <float> the amount of adjustment we want this layer to change its weights by.
+        """
         if (self.debug == True):
             print(f"....Creating layer {number} with {neuronsPerLayerCount} neurons.")
 
-        self.layers.append(Layer(number,neuronsPerLayerCount,activation,self.debug))
-        print(self.layers[number].getId())
+        self.layers.append(Layer(number,neuronsPerLayerCount,incomingConnections,activation,learningRate,self.debug))
+        self.layers[number].setStaticBias(self.bias)
+        self.layers[number].create()
+        if (self.debug == True):
+            print(self.layers[number].getId())
 
     def _iterateThroughNLayers(self,maxDepth=1):
         depthCounter = 0
