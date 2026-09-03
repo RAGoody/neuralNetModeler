@@ -21,7 +21,7 @@ from network.network import Network
 import sys
 from readchar import readkey, key
 
-parameters = CLI(parameters=['input', 'output', 'activation', 'layers', 'neuronsperlayer', 'usesuggested', 'training', 'trainingcolumn', 'learningrate', 'useconfig'])
+parameters = CLI(parameters=['input', 'output', 'activation', 'layers', 'neuronsperlayer', 'usesuggested', 'training', 'trainingcolumn', 'learningrate', 'useconfig', 'epochs'])
 print(parameters.getParameters())
 
 #read our config - set aside for now in lieu of intaking parameters from the CLI
@@ -34,20 +34,22 @@ neuralNetwork.featuresToIgnore([0,1])
 if (parameters.getParameter('training') == True):
     inputFile = File(path="data/training",name=parameters.getParameter('input'))
     print("Training mode detected.")
+    neuralNetwork.setTrainingColumn(parameters.getParameter('trainingcolumn'))  #remember to account for any ignored columns.
+    epochs = parameters.getParameter('epochs')
+    if (epochs == None):
+        epochs = 1
+    print(f"Training for {epochs} epochs.")
 else:
     inputFile = File(path="data/input", name=parameters.getParameter('input'))
     print("Predictive mode detected.")
 
 #read our data
 print(f"Reading input file: {inputFile.fullPath}")
-
 inputFile.setColumnsToIngore([0,1])  #columns 0 and 1 are lat/long and 10 is if there's a target present.
 data = inputFile.readCSVIntoMatrix(True)
 dataMatrix = Matrix(data)
 dataMatrix.normalize()
 neuralNetwork.setMatrix(dataMatrix)
-if (parameters.getParameter('training') == True):
-    neuralNetwork.setTrainingColumn(parameters.getParameter('trainingcolumn'))  #remember to account for any ignored columns.
 
 #determine if we're using forced depth and neuron count, or if we're going to use what the object suggests.
 if (parameters.getParameter('usesuggested') == True):
@@ -70,7 +72,10 @@ else:
 
 activation = parameters.getParameter('activation')
 neuralNetwork.setOutputLayer(1,'sigmoid')
-#neuralNetwork.setIterationBreak(1)
+#neuralNetwork.setIterationBreak(5)
+neuralNetwork.setBias(0.2)
+neuralNetwork.setLearningRate(0.002)
+neuralNetwork.setEpochs(epochs)
 neuralNetwork.initialize(layerCount,neuronsPerLayerCount,activation)
 
 print(f"Network Initialized: {neuralNetwork}")
