@@ -1,13 +1,15 @@
 from neuron.neuron import Neuron
 import uuid
 
-
 class Layer:
     debug = False
     layer = 0   #which layer this is in depth
     neuronsPerLayerCount = 0 #how many neurons we have per layer
     activation = 'relu'
     inputSet = False
+    learningRate = 0.01
+    staticBias = 0.1
+    useStaticBias = False
     incomingConnections = 0
     outgoingConnections = 0
 
@@ -16,7 +18,7 @@ class Layer:
         instance = super().__new__(cls)
         return instance 
 
-    def __init__(self,layer,neuronsPerLayerCount,activation,debug=False):
+    def __init__(self,layer,neuronsPerLayerCount,incomingConnections,activation,learningRate,debug=False):
         """
             Sets out attributes <boolean>debug and 
             <integer>layer depth this instance is with 0 being Input and the highest number Ouput, all between Hidden.
@@ -29,9 +31,13 @@ class Layer:
         self.output = []
         self.debug = debug
         self.layer = layer
+        self.learningRate = learningRate
         self.neuronsPerLayerCount = neuronsPerLayerCount
-        self.incomingConnections = neuronsPerLayerCount #placeholder for later modifications to adjust layer width.
-        self._createLayer(neuronsPerLayerCount,activation)
+        self.incomingConnections = incomingConnections
+        self.activation = activation
+
+    def create(self):
+        self._createLayer(self.neuronsPerLayerCount,self.activation,self.learningRate)
 
     def getId(self):
         return self.id
@@ -62,27 +68,46 @@ class Layer:
             output.append(self.neurons[i].calculate())
 
         self.output = output
-        if (self.debug == True):
-            print(f"Layer: {self.layer} has generated output: {self.output}")
+        #if (self.debug == True):
+            #print(f"Layer: {self.layer} has generated output: {self.output}")
 
         return self.output
 
     def isInputSet(self):
         return self.inputSet
 
-    def generateBias(self):
-        for i in range(self.inputLen):
-            self.bias[i] = 0
-
-    def generateWeights(self):
-        for i in range(self.inputLen):
-            b = 1
-    
     def getNeuron(self,number):
         return self.neurons[number]
 
+    def learn(self,trainingIndicator,predictedProbability):
+        for i in range(self.neuronsPerLayerCount):
+            self.neurons[i].learn(trainingIndicator,predictedProbability[i])
+
+    def calculateErrors(self,comparisonLayer):
+        for thisNeuronIndex in range(self.neuronsPerLayerCount):
+            thisDelta = 0
+            thisWeight = 0
+            for thisComparisonNeuron in range(comparisonLayer.getneuronsPerLayerCount()):
+                thisDelta += comparisonLayer.getNeuron(thisComparisonNeuron).getDelta()
+                thisWeight += comparisonLayer.getNeuron(thisComparisonNeuron).getSpecificWeight(thisNeuronIndex)
+
+            self.neurons[thisNeuronIndex].calculateHiddenDelta(thisDelta,thisWeight)
+
+        for thisNeuronIndex in range(self.neuronsPerLayerCount):
+            self.neurons[thisNeuronIndex].adjustWeights()
+
+    def getWeightsAtIndex(self,index):
+        weights = []
+        for thisNeuronIndex in range(self.neuronsPerLayerCount):
+            weights.append(self.neurons[thisNeuronIndex].getSpecificWeight(index))
+
+        return weights
+
     def getNeurons(self):
         return self.neurons
+
+    def getneuronsPerLayerCount(self):
+        return self.neuronsPerLayerCount
 
     def setDebug(self,debug):
         self.debug = debug
@@ -95,15 +120,24 @@ class Layer:
         for i in range(self.neuronsPerLayerCount):
             self.neurons[i].setBias(self.bias[i])
 
-    def _createLayer(self,neuronsPerLayerCount,activation):
+    def generateBias(self):
+        for i in range(self.inputLen):
+            self.bias[i] = 0
+
+    def setStaticBias(self,bias):
+        self.staticBias = bias
+        self.useStaticBias = True
+
+    def _createLayer(self,neuronsPerLayerCount,activation,learningRate):
         for i in range(neuronsPerLayerCount):
-            if (self.debug == True):
-                print(f"........Creating neuron {i}.")
-
             self.neurons.append(Neuron())
-            if (self.debug == True):
-                print(self.neurons[i].getId())
-
             self.neurons[i].setConnections(self.incomingConnections)
             self.neurons[i].setActivation(activation)
-            self.neurons[i].setBias(0)
+            self.neurons[i].setLearningRate(learningRate)
+            if (self.useStaticBias == True):
+                self.neurons[i].setBias(self.staticBias)
+            else:
+                self.neurons[i].setBias(self.bias[i])
+
+            if (self.debug == True):
+                print(f"........Created neuron {i}. {self.neurons[i].getId()}. Activation: {self.neurons[i].getActivation()}. Learning Rate: {self.neurons[i].getLearningRate()}. Bias: {self.neurons[i].getBias()}. Connections: {self.neurons[i].getConnections()}")
