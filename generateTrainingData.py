@@ -31,7 +31,7 @@ o2 = np.random.normal(loc=21.0, scale=0.5, size=NUM_SAMPLES)
 # 2. Higher audio decibels
 # 3. Both of those readings are amplified when altitude is lower (Inverse Square Law)
 
-target_present = np.random.choice([0, 1], size=NUM_SAMPLES, p=[0.7, 0.3]) # 30% chance of finding life
+target_present = np.random.choice([0, 1], size=NUM_SAMPLES, p=[0.5, 0.5]) # 30% chance of finding life
 
 thermal_reading = []
 audio_reading = []
