@@ -9,9 +9,11 @@ class Network:
         TODO: save state of training neurons to a file for later use. This will allow us to save the trained model and use it for predictions without retraining.
         TODO: implement a method to load a trained model from a file and use it for predictions.
         TODO: complete matrix analysis to suggest a number of layers and neurons per layer based on the input data.
+        TODO: shuffle the input data for each epoch to ensure that the training is not biased by the order of the data.
             Currently suggests 3 layers and a number of neurons equal to the number of features in the input data.
         Example Usage:
             neuralNetwork = Network(True)
+            neuralNetwork.setMatrix(dataMatrix)
             neuralNetwork.featuresToIgnore([0,1])
             neuralNetwork.setTrainingColumn(8)
             neuralNetwork.setEpochs(500)
