@@ -1,8 +1,10 @@
 # handles basic file operations
 import os
-import csv
 
 class File:
+    """
+    A class to handle basic file operations such as reading and writing.
+    """
     name = ""
     path = ""
     fullPath = ""

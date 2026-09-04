@@ -11,7 +11,7 @@ class Neuron:
     activation = 'dud'
     id = ''
     delta = 0
-    learningRate = 0.001
+    learningRate = 0.001 #overriden if set at the layer level. overriden if set at the network level.
 
     def __new__(cls, *args, **kwargs):
         # Force the creation of a completely new object instance

@@ -3,6 +3,9 @@
 import argparse
 
 class CLI:
+    """
+    A class to handle command-line interface (CLI) parameters.
+    """
     parameters = {}
 
     def __init__(self,parameters):

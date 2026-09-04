@@ -1,4 +1,7 @@
 class Matrix:
+    """
+    A class to represent a matrix and perform basic operations on it.
+    """
     thisIsAMatrix = False
     length = 0
     width = 0

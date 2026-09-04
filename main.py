@@ -1,8 +1,9 @@
 """
 Orchestration program for modeling a neural net.
 Expects:
-    a file within the data/ directory named <input>.csv     data to process in CSV format with a header
-    a file within the data/ directory named <input>.json    json file of weights to assign to columns in <input>.csv
+    TODO: a file within the data/ directory named <input>.csv     data to process in CSV format with a header
+    TODO: a file within the data/ directory named <input>.json    json file of weights to assign to columns in <input>.csv
+    training data set within data/training/ directory named <input>.csv     data to process in CSV format with a header
 CLI parameters:
     <string>input - what file contains input. used in both training and predicting modes.
     <string>activation - which activation function math to use. Valid inputs: 'relu','sigmoid','tanh','softmax'. Softmax non operable.
@@ -10,7 +11,11 @@ CLI parameters:
     <integer>neuronsperlayer - nuerons per layer to use.
     <boolean>usesuggested - are we using suggested layercounts and neuroncounts or use the given CLI parameters for each?
     <boolean>training   - are we training the model?
-    <boolean>useconfig  - non operable
+    <integer>trainingcolumn - which column contains the training labels?
+    <integer>learningrate - what learning rate to use for training.
+    <integer>epochs - how many epochs to train for.
+
+Example usage: py main.py input=drone_sar_synthetic_data.csv activation=relu training=true trainingcolumn=8 usesuggested=true epochs=500
 
 """
 
@@ -21,7 +26,7 @@ from network.network import Network
 import sys
 from readchar import readkey, key
 
-parameters = CLI(parameters=['input', 'output', 'activation', 'layers', 'neuronsperlayer', 'usesuggested', 'training', 'trainingcolumn', 'learningrate', 'useconfig', 'epochs'])
+parameters = CLI(parameters=['input', 'output', 'activation', 'layers', 'neuronsperlayer', 'usesuggested', 'training', 'trainingcolumn', 'learningrate', 'epochs'])
 print(parameters.getParameters())
 
 #read our config - set aside for now in lieu of intaking parameters from the CLI
