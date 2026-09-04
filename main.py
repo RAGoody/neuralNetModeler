@@ -74,7 +74,7 @@ activation = parameters.getParameter('activation')
 neuralNetwork.setOutputLayer(1,'sigmoid')
 #neuralNetwork.setIterationBreak(5)
 neuralNetwork.setBias(0.2)
-neuralNetwork.setLearningRate(0.002)
+neuralNetwork.setLearningRate(0.001)
 neuralNetwork.setEpochs(epochs)
 neuralNetwork.initialize(layerCount,neuronsPerLayerCount,activation)
 
