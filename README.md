@@ -11,7 +11,8 @@ process the training set for as many times as epochs is loaded.
 With debug on, will update your CLI with progress on training.
 
 
-Example call from CLI: py main.py input=drone_sar_synthetic_data.csv activation=relu training=true trainingcolumn=8 usesuggested=true epochs=500
+Example call from CLI:
+'py main.py input=drone_sar_synthetic_data.csv activation=relu training=true trainingcolumn=8 usesuggested=true epochs=500
 
 Example usage can be seen in main.py
 
