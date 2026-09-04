@@ -20,29 +20,29 @@ Example call from CLI:
 Example usage can be seen in main.py.
 
 or :
-    ```python
-    neuralNetwork = Network(True) #initial setup with debug turned on
+```python
+neuralNetwork = Network(True) #initial setup with debug turned on
+
+neuralNetwork.setMatrix(dataMatrix) #load our Matrix object of data to process
+
+neuralNetwork.featuresToIgnore([0,1]) #if there are features in the data to ignore
+
+neuralNetwork.setTrainingColumn(8) #tells the Network we are training and which column in the Matrix holds our training label.
+
+neuralNetwork.setEpochs(500)
+
+neuralNetwork.setLearningRate(0.01)
+
+neuralNetwork.setBias(0.2) #initial bias
+
+neuralNetwork.setOutputLayer(1,'sigmoid') #how wide is the output layer and what is its activation function
+
+neuralNetwork.initialize(layerCount,neuronsPerLayerCount,'relu') #this will set off the creation of the layers and each layer its neurons with the given parameters.
     
-    neuralNetwork.setMatrix(dataMatrix) #load our Matrix object of data to process
+neuralNetwork.process() #starts processing.
     
-    neuralNetwork.featuresToIgnore([0,1]) #if there are features in the data to ignore
-    
-    neuralNetwork.setTrainingColumn(8) #tells the Network we are training and which column in the Matrix holds our training label.
-    
-    neuralNetwork.setEpochs(500)
-    
-    neuralNetwork.setLearningRate(0.01)
-    
-    neuralNetwork.setBias(0.2) #initial bias
-    
-    neuralNetwork.setOutputLayer(1,'sigmoid') #how wide is the output layer and what is its activation function
-    
-    neuralNetwork.initialize(layerCount,neuronsPerLayerCount,'relu') #this will set off the creation of the layers and each layer its neurons with the given parameters.
-    
-    neuralNetwork.process() #starts processing.
-    
-    #TODO neuralNetwork.getPredicionRate() #retrieve the final prediction rate
-    
-    #TODO neuralNetwork.save() #save the network state.
-    ```
+#TODO neuralNetwork.getPredicionRate() #retrieve the final prediction rate
+   
+#TODO neuralNetwork.save() #save the network state.
+```
 
