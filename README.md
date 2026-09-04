@@ -8,16 +8,19 @@ Currently the network will load a set of data from a CSV into a helper Matrix ob
 Set your layers, count of neurons per layer, the type of activation function (relu, tanh, and sigmoid supported), learning rate, how many epochs to run, and this will 
 process the training set for as many times as epochs is loaded.
 
-With debug on, will update your CLI with progress on training.
+With debug on your CLI will update progress on training.
+
+Lots of cleanup and tweaking needed, but is currently trainable.
 
 
 Example call from CLI:
-`py main.py input=drone_sar_synthetic_data.csv activation=relu training=true trainingcolumn=8 usesuggested=true epochs=500
 
-Example usage can be seen in main.py
+> py main.py input=drone_sar_synthetic_data.csv activation=relu training=true trainingcolumn=8 usesuggested=true epochs=500
+
+Example usage can be seen in main.py.
 
 or :
-    
+    ```python
     neuralNetwork = Network(True) #initial setup with debug turned on
     
     neuralNetwork.setMatrix(dataMatrix) #load our Matrix object of data to process
@@ -41,4 +44,5 @@ or :
     #TODO neuralNetwork.getPredicionRate() #retrieve the final prediction rate
     
     #TODO neuralNetwork.save() #save the network state.
+    ```
 
