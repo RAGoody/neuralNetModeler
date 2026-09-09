@@ -2,6 +2,30 @@ from neuron.neuron import Neuron
 import uuid
 
 class Layer:
+    """
+    Author: R. A. Goodwin
+    Date: August 2026 - September 2026
+    This code is fully human-generated and is not AI-generated.
+    A class to represent a layer in a neural network. Each layer contains multiple neurons and manages the flow of data through them.
+    Attributes:
+        id (str): A unique identifier for the layer.
+        neurons (list): A list of Neuron objects contained in the layer.
+        weights (list): A list of weights for the connections to the next layer.
+        bias (list): A list of bias values for the neurons in the layer.
+        input (list): The input values to the layer.
+        output (list): The output values from the layer after processing.
+        debug (bool): A flag to enable or disable debug output.
+        layer (int): The depth of the layer in the network (0 for input, highest for output).
+        neuronsPerLayerCount (int): The number of neurons in the layer.
+        activation (str): The activation function type for the neurons in the layer ('relu', 'sigmoid', 'tanh', 'softmax').
+        inputSet (bool): A flag indicating whether the input has been set for the layer.
+        learningRate (float): The learning rate for weight adjustments in the layer.
+        staticBias (float): A static bias value to be applied to all neurons in the layer if useStaticBias is True.
+        useStaticBias (bool): A flag indicating whether to use a static bias for all neurons in the layer.
+        incomingConnections (int): The number of incoming connections to the layer.
+        outgoingConnections (int): The number of outgoing connections from the layer. #NOT IN USE & NEEDS TO BE REMOVED.
+        activation (str): The activation function type for the neurons in the layer ('relu', 'sigmoid', 'tanh', 'softmax').
+    """
     debug = False
     layer = 0   #which layer this is in depth
     neuronsPerLayerCount = 0 #how many neurons we have per layer
@@ -20,8 +44,9 @@ class Layer:
 
     def __init__(self,layer,neuronsPerLayerCount,incomingConnections,activation,learningRate,debug=False):
         """
-            Sets out attributes <boolean>debug and 
-            <integer>layer depth this instance is with 0 being Input and the highest number Ouput, all between Hidden.
+        Sets out attributes
+            debug (bool)
+            layer (int) depth this instance is with 0 being Input and the highest number Ouput, all in between Hidden.
         """
         self.id = f'Layer-{layer}-{uuid.uuid4()}'
         self.neurons = [] #each position is a neuron.

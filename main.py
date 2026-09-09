@@ -1,19 +1,24 @@
 """
+Author: R. A. Goodwin
+Date: August 2026 - September 2026
 Orchestration program for modeling a neural net.
+This code is fully human-generated and is not AI-generated.
+It is designed to read in a CSV file of training data, configure a neural network based on user parameters, 
+and either train the model or make predictions based on the input data.
 Expects:
     TODO: a file within the data/ directory named <input>.csv     data to process in CSV format with a header
     TODO: a file within the data/ directory named <input>.json    json file of weights to assign to columns in <input>.csv
     training data set within data/training/ directory named <input>.csv     data to process in CSV format with a header
 CLI parameters:
-    <string>input - what file contains input. used in both training and predicting modes.
-    <string>activation - which activation function math to use. Valid inputs: 'relu','sigmoid','tanh','softmax'. Softmax non operable.
-    <integer>layers - how many layers to use.
-    <integer>neuronsperlayer - nuerons per layer to use.
-    <boolean>usesuggested - are we using suggested layercounts and neuroncounts or use the given CLI parameters for each?
-    <boolean>training   - are we training the model?
-    <integer>trainingcolumn - which column contains the training labels?
-    <integer>learningrate - what learning rate to use for training.
-    <integer>epochs - how many epochs to train for.
+    input (str) - what file contains input. used in both training and predicting modes.
+    activation (str) - which activation function math to use. Valid inputs: 'relu','sigmoid','tanh','softmax'. Softmax non operable.
+    layers (int) - how many layers to use.
+    neuronsperlayer (int) - neurons per layer to use.
+    usesuggested (bool) - are we using suggested layercounts and neuroncounts or use the given CLI parameters for each?
+    training (bool) - are we training the model?
+    trainingcolumn (int) - which column contains the training labels?
+    learningrate (int) - what learning rate to use for training.
+    epochs (int) - how many epochs to train for.
 
 Example usage: py main.py input=drone_sar_synthetic_data.csv activation=relu training=true trainingcolumn=8 usesuggested=true epochs=500
 

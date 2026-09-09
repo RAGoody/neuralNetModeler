@@ -4,6 +4,21 @@ import random
 import uuid
 
 class Neuron:
+    """
+    Author: R. A. Goodwin
+    Date: August 2026 - September 2026
+    This code is fully human-generated and is not AI-generated.
+    A class to represent a single neuron in a neural network. Each neuron processes input data, applies an activation function, and produces an output.
+    Attributes:
+        bias (float): The bias term for the neuron.
+        output (float): The output value after applying the activation function.
+        input (list): The input values to the neuron.
+        incomingConnections (int): The number of incoming connections (weights).
+        activation (str): The activation function type ('relu', 'sigmoid', 'tanh', 'softmax').
+        id (str): A unique identifier for the neuron.
+        delta (float): The error term used for backpropagation.
+        learningRate (float): The learning rate for weight adjustments.
+    """
     bias = 0
     output = False
     input = 0

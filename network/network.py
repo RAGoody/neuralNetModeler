@@ -4,23 +4,26 @@ import math
 
 class Network:
     """
-        This class handles the orchestration of a neural network. It manages layers, neurons, and the flow of data through the network.
-        Current state: will trainin on a data set, output its progress as it learns for the observer to see if it is learning or not. 
-        TODO: save state of training neurons to a file for later use. This will allow us to save the trained model and use it for predictions without retraining.
-        TODO: implement a method to load a trained model from a file and use it for predictions.
-        TODO: complete matrix analysis to suggest a number of layers and neurons per layer based on the input data.
-        TODO: shuffle the input data for each epoch to ensure that the training is not biased by the order of the data.
-            Currently suggests 3 layers and a number of neurons equal to the number of features in the input data.
-        Example Usage:
-            neuralNetwork = Network(True)
-            neuralNetwork.setMatrix(dataMatrix)
-            neuralNetwork.featuresToIgnore([0,1])
-            neuralNetwork.setTrainingColumn(8)
-            neuralNetwork.setEpochs(500)
-            neuralNEtwork.setLearningRate(0.01)
-            neuralNetwork.setOutputLayer(1,'sigmoid')
-            neuralNetwork.initialize(layerCount,neuronsPerLayerCount,'relu')
-            neuralNetwork.process()
+    Author: R. A. Goodwin
+    Date: August 2026 - September 2026
+    This code is fully human-generated and is not AI-generated.
+    This class handles the orchestration of a neural network. It manages layers, neurons, and the flow of data through the network.
+    Current state: will trainin on a data set, output its progress as it learns for the observer to see if it is learning or not. 
+    TODO: save state of training neurons to a file for later use. This will allow us to save the trained model and use it for predictions without retraining.
+    TODO: implement a method to load a trained model from a file and use it for predictions.
+    TODO: complete matrix analysis to suggest a number of layers and neurons per layer based on the input data.
+    TODO: shuffle the input data for each epoch to ensure that the training is not biased by the order of the data.
+        Currently suggests 3 layers and a number of neurons equal to the number of features in the input data.
+    Example Usage:
+        neuralNetwork = Network(True)
+        neuralNetwork.setMatrix(dataMatrix)
+        neuralNetwork.featuresToIgnore([0,1])
+        neuralNetwork.setTrainingColumn(8)
+        neuralNetwork.setEpochs(500)
+        neuralNEtwork.setLearningRate(0.01)
+        neuralNetwork.setOutputLayer(1,'sigmoid')
+        neuralNetwork.initialize(layerCount,neuronsPerLayerCount,'relu')
+        neuralNetwork.process()
     """
     debug = False
     layerCount = 0

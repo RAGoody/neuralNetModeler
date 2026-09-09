@@ -3,6 +3,12 @@ Welcome!
 
 This is a Python program that models a neural network.
 
+Author: Ryan A. Goodwin
+
+Dates: August 2026 - September 2026
+
+All software here, excepting generateTrainingData.py written by human hands.
+
 Currently the network will load a set of data from a CSV into a helper Matrix object which is then loaded into the Network object.
 
 Set your layers, count of neurons per layer, the type of activation function (relu, tanh, and sigmoid supported), learning rate, how many epochs to run, and this will 
