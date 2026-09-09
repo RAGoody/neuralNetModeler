@@ -1,3 +1,13 @@
+"""
+    This script generates a synthetic dataset for training a neural network to detect the presence of life (e.g., survivors) 
+    in a search and rescue scenario using drone sensor data. The dataset includes various environmental features, sensor readings, 
+    and a target variable indicating whether life is present.
+
+    This script was mostly AI-generated with Gemini 3.1 Pro
+"""
+
+from random import random
+
 import pandas as pd
 import numpy as np
 
@@ -35,6 +45,8 @@ target_present = np.random.choice([0, 1], size=NUM_SAMPLES, p=[0.5, 0.5]) # 30% 
 
 thermal_reading = []
 audio_reading = []
+cell_signal = []
+bluetooth_signal = []
 
 for i in range(NUM_SAMPLES):
     # Baseline environment without life
@@ -55,11 +67,25 @@ for i in range(NUM_SAMPLES):
         
         # Slight CO2 spike near living things (exhalation)
         co2[i] += np.random.uniform(5, 15)
+        rng = np.random.default_rng()
+
+        # 70% chance the survivor still has their devices active
+        if rng.random() < 0.70:
+            cell_signal.append(round(np.random.uniform(-75.0, -30.0), 2))
+            bluetooth_signal.append(round(np.random.uniform(-80.0, -40.0), 2))
+        else:
+            # Survivor is present, but devices are lost, broken, or dead
+            cell_signal.append(round(np.random.uniform(-120.0, -90.0), 2))
+            bluetooth_signal.append(round(np.random.uniform(-110.0, -95.0), 2))
         
     else:
         # No life present
         thermal_reading.append(base_temp)
         audio_reading.append(base_audio)
+
+        # Empty terrain: No devices nearby, just faint background RF static
+        cell_signal.append(round(np.random.uniform(-120.0, -90.0), 2))
+        bluetooth_signal.append(round(np.random.uniform(-110.0, -95.0), 2))
         
         # Add some false positives! 
         # e.g., A hot rock might spike the thermal sensor, but won't spike the audio or CO2
@@ -74,29 +100,21 @@ for i in range(NUM_SAMPLES):
 data = {
     "latitude": latitudes,
     "longitude": longitudes,
-    "altitudeOfTerrain": np.random.uniform(low=0.0, high=3000.0, size=NUM_SAMPLES), # Just adding raw terrain elevation
-    "altitudeOfReadingAboveTerrain": altitude_above_terrain,
-    "thermalReadingCelsius": thermal_reading,
-    "audioReadingDecibels": audio_reading,
+    "altitude-terrain-above-sea-level": np.random.uniform(low=0.0, high=3000.0, size=NUM_SAMPLES), # Just adding raw terrain elevation
+    "altitude-drone": altitude_above_terrain,
+    "thermal-Reading-Celsius": thermal_reading,
+    "audio-Reading-Decibels": audio_reading,
     "particulate-smoke": particulate_smoke,
     "particulate-watervapor": particulate_watervapor,
     "co2": co2,
     "o2": o2,
+    "cell-signal-strength": cell_signal,
+    "bluetooth-signal-strength": bluetooth_signal,
     "target_present": target_present
 }
 
 df = pd.DataFrame(data)
 
-# -------------------------------------------------------------
-# THE COMPROMISE: EXCLUDING COLUMNS
-# -------------------------------------------------------------
-# You can instruct your main.py parser to use a list of columns to drop 
-# before feeding the matrix to the input layer.
-
-columns_to_ignore = ['latitude', 'longitude', 'altitudeOfTerrain']
-model_input_df = df.drop(columns=columns_to_ignore)
-
 # Save the full CSV for reference, and print the shape of the model-ready data
 df.to_csv("./data/training/drone_sar_synthetic_data.csv", index=False)
 print(f"Full dataset saved with shape: {df.shape}")
-print(f"Model-ready dataset shape (excluding {columns_to_ignore}): {model_input_df.shape}")
