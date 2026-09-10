@@ -16,7 +16,7 @@ process the training set for as many times as epochs is loaded.
 
 With debug on your CLI will update progress on training.
 
-There is still plenty to do with this project. The intent is for myself to learn the internals of how the networks move data, back propagate, and learn from the data.
+There is still plenty to do with this project. The intent is for myself to learn the internals of how neural networks move data, back propagate, and learn from the data.
 
 This was built as a part of my MIT Professional Education: From Data to Decisions with Machine Learning and to support the impact project DRONET.
 
