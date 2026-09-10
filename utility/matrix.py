@@ -1,5 +1,8 @@
 class Matrix:
     """
+    Author: R. A. Goodwin
+    Date: August 2026 - September 2026
+    This code is fully human-generated and is not AI-generated.
     A class to represent a matrix and perform basic operations on it.
     """
     thisIsAMatrix = False

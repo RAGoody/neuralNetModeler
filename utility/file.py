@@ -3,6 +3,9 @@ import os
 
 class File:
     """
+    Author: R. A. Goodwin
+    Date: August 2026 - September 2026
+    This code is fully human-generated and is not AI-generated.
     A class to handle basic file operations such as reading and writing.
     """
     name = ""

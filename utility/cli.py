@@ -4,6 +4,9 @@ import argparse
 
 class CLI:
     """
+    Author: R. A. Goodwin
+    Date: August 2026 - September 2026
+    This code is fully human-generated and is not AI-generated.
     A class to handle command-line interface (CLI) parameters.
     """
     parameters = {}
