@@ -24,12 +24,17 @@ Example usage: py main.py input=drone_sar_synthetic_data.csv activation=relu tra
 
 """
 
+#Package Imports
+from datetime import datetime
+import json
+import sys
+from readchar import readkey, key
+
+#Custom Imports
 from utility.file import File
 from utility.cli import CLI
 from utility.matrix import Matrix
 from network.network import Network
-import sys
-from readchar import readkey, key
 
 parameters = CLI(parameters=['input', 'output', 'activation', 'layers', 'neuronsperlayer', 'usesuggested', 'training', 'trainingcolumn', 'learningrate', 'epochs'])
 print(parameters.getParameters())
@@ -51,7 +56,7 @@ if (parameters.getParameter('training') == True):
     print(f"Training for {epochs} epochs.")
 else:
     inputFile = File(path="data/input", name=parameters.getParameter('input'))
-    print("Predictive mode detected.")
+    print("Predictive mode detected. Loading latest saved state.")
 
 #read our data
 print(f"Reading input file: {inputFile.fullPath}")
@@ -112,3 +117,8 @@ if (key == "\x1b"):
 print("...Saving (not implemented).")
 networkState = neuralNetwork.getState()
 print(f"Network State: {networkState}")
+networkStateJSON = json.dumps(networkState)
+
+todaysDate = datetime.now().strftime("%Y-%m-%d_%H-%M-%S")
+stateFile = File(path="data/output",name=f"network_state_{todaysDate}.json")
+stateFile.write(networkStateJSON,True)
