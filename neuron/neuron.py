@@ -113,7 +113,6 @@ class Neuron:
 
     def learn(self,trainingIndicator,predictedProbability):
         self.delta = predictedProbability - trainingIndicator
-        #print(f"            Neuron:learn() : delta: {self.delta}")
         self.adjustWeights()
         return self.delta
 
@@ -150,6 +149,9 @@ class Neuron:
         print (f"weights after: {self.weights}")
         print ("==================================================")
         """
+
+    def getWeights(self):
+        return self.weights
 
     def getSpecificWeight(self,index):
         return self.weights[index]

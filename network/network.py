@@ -335,6 +335,20 @@ class Network:
         #print(f"thisoutput: {output} thisLoss: {loss}")
         return loss
 
+    def getState(self):
+        """
+            Returns the current state of the network. This will allow us to save the trained model and use it for predictions without retraining.
+            State is defined as the weights and biases of each neuron in each layer. This will be a list of lists of lists. 
+            Each layer is a list of neurons, each neuron is a list of weights and a bias.
+        """
+        state = []
+        for layer in self.layers:
+            layerState = []
+            thisLayerState = layer.getState()
+            layerState.append(thisLayerState)
+            state.append(layerState)
+        return state
+
     def _createNet(self,layerCount,neuronsPerLayerCount,activation,learningRate):
         """
             Orchestrates creating the whole net. Uses parameters to build the incoming and hidden layers.

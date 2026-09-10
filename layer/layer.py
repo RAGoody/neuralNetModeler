@@ -153,6 +153,21 @@ class Layer:
         self.staticBias = bias
         self.useStaticBias = True
 
+    def getState(self):
+        """
+            Returns the current state of the layer. This will allow us to save the trained model and use it for predictions without retraining.
+            State is defined as the weights and biases of each neuron in the layer. This will be a list of lists. 
+            Each neuron is a list of weights and a bias.
+        """
+        state = []
+        for neuron in self.neurons:
+            neuron_state = {
+                'weights': neuron.getWeights(),
+                'bias': neuron.getBias()
+            }
+            state.append(neuron_state)
+        return state
+
     def _createLayer(self,neuronsPerLayerCount,activation,learningRate):
         for i in range(neuronsPerLayerCount):
             self.neurons.append(Neuron())
