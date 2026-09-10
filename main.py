@@ -101,7 +101,7 @@ else:
 neuralNetwork.process()
 
 print(f"Processing completed")
-print("Save state? Press 'Y' to save or 'escape' to quit.")
+print("Save state? Press any key to save or 'escape' to quit.")
 key = readkey()
 if (key == "\x1b"):
     print("exiting. Goodbye.")
