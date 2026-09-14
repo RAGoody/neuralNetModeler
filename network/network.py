@@ -337,9 +337,9 @@ class Network:
 
     def getState(self):
         """
-            Returns the current state of the network. This will allow us to save the trained model and use it for predictions without retraining.
-            State is defined as the weights and biases of each neuron in each layer. This will be a list of lists of lists. 
-            Each layer is a list of neurons, each neuron is a list of weights and a bias.
+        Returns the current state of the network. This will allow us to save the trained model and use it for predictions without retraining.
+        State is defined as the weights and biases of each neuron in each layer. This will be a list of lists of lists. 
+        Each layer is a list of neurons, each neuron has a list of weights and a bias.
         """
         state = []
         for layer in self.layers:
@@ -348,6 +348,17 @@ class Network:
             layerState.append(thisLayerState)
             state.append(layerState)
         return state
+
+    def loadState(self,state):
+        """
+        Loads a previously saved state of the network. This will allow us to use a trained model for predictions without retraining.
+        State is defined as the weights and biases of each neuron in each layer. This will be a list of lists of lists. 
+        Each layer is a list of neurons, each neuron has a list of weights and a bias.
+        """
+        for layerIndex in range(len(state)):
+            thisLayerState = state[layerIndex][0]
+            thisLayer = self.layers[layerIndex]
+            thisLayer.loadState(thisLayerState) #TODO: Implement state loading into layer. Should use existing setWeights and setBias
 
     def _createNet(self,layerCount,neuronsPerLayerCount,activation,learningRate):
         """

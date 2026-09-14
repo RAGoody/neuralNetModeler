@@ -155,6 +155,9 @@ class Neuron:
 
     def getSpecificWeight(self,index):
         return self.weights[index]
+
+    def setWeights(self,weights):
+        self.weights = weights
  
     def _isValidActivation(self,activation):
         """

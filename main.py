@@ -27,6 +27,7 @@ Example usage: py main.py input=drone_sar_synthetic_data.csv activation=relu tra
 #Package Imports
 from datetime import datetime
 import json
+from random import random
 import sys
 from readchar import readkey, key
 
@@ -36,7 +37,7 @@ from utility.cli import CLI
 from utility.matrix import Matrix
 from network.network import Network
 
-parameters = CLI(parameters=['input', 'output', 'activation', 'layers', 'neuronsperlayer', 'usesuggested', 'training', 'trainingcolumn', 'learningrate', 'epochs'])
+parameters = CLI(parameters=['input', 'output', 'activation', 'layers', 'neuronsperlayer', 'usesuggested', 'training', 'trainingcolumn', 'learningrate', 'epochs', 'statefile', 'mode'])
 print(parameters.getParameters())
 
 #read our config - set aside for now in lieu of intaking parameters from the CLI
@@ -53,10 +54,14 @@ if (parameters.getParameter('training') == True):
     epochs = parameters.getParameter('epochs')
     if (epochs == None):
         epochs = 1
-    print(f"Training for {epochs} epochs.")
 else:
-    inputFile = File(path="data/input", name=parameters.getParameter('input'))
-    print("Predictive mode detected. Loading latest saved state.")
+    stateFile = File(path="data/input", name=parameters.getParameter('statefile'))
+    print(f"Predictive mode detected. Loading latest state from {stateFile.fullPath} (expected in JSON format).")
+    stateFile.read()
+    networkState = json.loads(stateFile.getContents())
+    print(f"....... Now loading input file from {stateFile.fullPath} (expected in JSON format).")
+
+
 
 #read our data
 print(f"Reading input file: {inputFile.fullPath}")
@@ -88,6 +93,8 @@ else:
 activation = parameters.getParameter('activation')
 neuralNetwork.setOutputLayer(1,'sigmoid')
 #neuralNetwork.setIterationBreak(5)
+
+#TODO: Update logic to support processing mode vs. training mode. We we are in predictive mode, we do not want to adjust weights and bias.
 neuralNetwork.setBias(0.2)
 neuralNetwork.setLearningRate(0.001)
 neuralNetwork.setEpochs(epochs)

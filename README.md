@@ -21,12 +21,11 @@ There is still plenty to do with this project. The intent is for myself to learn
 This was built as a part of my MIT Professional Education: From Data to Decisions with Machine Learning and to support the impact project DRONET.
 
 A few outstanding TODOs:
-1. TODO: save state of training neurons to a file for later use. This will allow us to save the trained model and use it for predictions without retraining.
-2. TODO: implement a method to load a trained model from a file and use it for predictions.
-3. TODO: complete matrix analysis to suggest a number of layers and neurons per layer based on the input data.
-4. TODO: shuffle the input data for each epoch to ensure that the training is not biased by the order of the data.
-5. TODO: Implement softmax
-6. TODO: Implement testing
+1. TODO: implement a method to load a trained model from a file and use it for predictions.
+2. TODO: complete matrix analysis to suggest a number of layers based on the input data.
+3. TODO: shuffle the input data for each epoch to ensure that the training is not biased by the order of the data.
+4. TODO: Implement softmax
+5. TODO: Implement testing
 
 Example call from CLI:
 

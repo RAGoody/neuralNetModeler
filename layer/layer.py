@@ -128,6 +128,10 @@ class Layer:
 
         return weights
 
+    def setWeights(self,weights):
+        for thisNeuronIndex in range(self.neuronsPerLayerCount):
+            self.neurons[thisNeuronIndex].setWeights(weights[thisNeuronIndex])
+
     def getNeurons(self):
         return self.neurons
 
