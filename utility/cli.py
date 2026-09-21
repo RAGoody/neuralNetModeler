@@ -30,6 +30,11 @@ class CLI:
     def getParameters(self):
         return self.parameters
 
+    def setRequiredParameters(self, requiredParameters):
+        missingParameters = [param for param in requiredParameters if param not in self.parameters]
+        if missingParameters:
+            raise ValueError(f"Missing required parameters: {', '.join(missingParameters)}")
+
     def _typeParameter(self,value):
         useTemp = False
         match value.lower(): #Are ya a boolean disguised as a silly string!?
