@@ -22,6 +22,7 @@ This was built as a part of my MIT Professional Education: From Data to Decision
 
 A few outstanding TODOs:
 1. TODO: implement a method to load a trained model from a file and use it for predictions.
+2. TODO: separate main.py into a training.py and a prediction.py
 2. TODO: complete matrix analysis to suggest a number of layers based on the input data.
 3. TODO: shuffle the input data for each epoch to ensure that the training is not biased by the order of the data.
 4. TODO: Implement softmax
