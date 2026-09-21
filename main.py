@@ -45,7 +45,6 @@ print(parameters.getParameters())
 
 #init our empty network with debug turned on.
 neuralNetwork = Network(True)
-neuralNetwork.featuresToIgnore([0,1])
 
 if (parameters.getParameter('training') == True):
     inputFile = File(path="data/training",name=parameters.getParameter('input'))
@@ -60,8 +59,6 @@ else:
     stateFile.read()
     networkState = json.loads(stateFile.getContents())
     print(f"....... Now loading input file from {stateFile.fullPath} (expected in JSON format).")
-
-
 
 #read our data
 print(f"Reading input file: {inputFile.fullPath}")
