@@ -92,7 +92,7 @@ class File:
     def _stripColumns(self,listToClean):
         offSet = 0
         for i in range(self.ignoreLength):
-            thisColToStrip = self.ignoreThese[i]
+            thisColToStrip = int(self.ignoreThese[i])
             #Once you delete the first time, the resulting List is shrunk by one.
             #So we need to reduce our column list by however many times we've deleted a column.
             thisColToStrip = thisColToStrip - offSet
