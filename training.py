@@ -1,7 +1,7 @@
 """
 Author: R. A. Goodwin
 Date: August 2026 - September 2026
-Orchestration program for training our model a neural net.
+Orchestration program for TRAINING our model neural net.
 This code is fully human-generated and is not AI-generated.
 It is designed to read in a CSV file of training data, configure a neural network based on user parameters, 
 and either train the model or make predictions based on the input data.
@@ -131,5 +131,5 @@ print(f"Network State: {networkState}")
 networkStateJSON = json.dumps(networkState)
 
 todaysDate = datetime.now().strftime("%Y-%m-%d_%H-%M-%S")
-stateFile = File(path="data/output",name=f"network_state_{todaysDate}.json")
+stateFile = File(path="data/output",name=f"{name}_{todaysDate}.json")
 stateFile.write(networkStateJSON,True)
