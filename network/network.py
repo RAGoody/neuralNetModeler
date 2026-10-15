@@ -199,7 +199,31 @@ class Network:
             self.suggestedNeurons -= 1  #make sure to reduce suggested neuron count by 1 since we expect a column to be our training reference.
 
         return True
+    
+    def predict(self):
+        """
+            Runs the data through the network and returns the output of the last layer.
+            This is used for making predictions on new data after the network has been trained.
+        """
+        if (self.initialized == False):
+            return False
 
+        matrixLength = self.matrix.getLength()
+        predictions = []
+        for row in range(matrixLength):
+            input = self.matrix.getRowAsList(row)
+            self.layers[0].setInput(input)
+            priorOutput = self.layers[0].process()
+
+            for layerIndex in range(self.layerCount):
+                if layerIndex > 0:
+                    self.layers[layerIndex].setInput(priorOutput)
+                    priorOutput = self.layers[layerIndex].process()
+
+            predictions.append(priorOutput)
+
+        return predictions
+    
     def process(self,iteration=0):
         """Send the dataset into the network for processing"""
         if (self.initialized == False):
@@ -341,12 +365,22 @@ class Network:
         State is defined as the weights and biases of each neuron in each layer. This will be a list of lists of lists. 
         Each layer is a list of neurons, each neuron has a list of weights and a bias.
         """
-        state = []
+        state = dict()
+        state['layers'] = []
         for layer in self.layers:
             layerState = []
             thisLayerState = layer.getState()
             layerState.append(thisLayerState)
-            state.append(layerState)
+            state['layers'].append(layerState)
+
+        state['activation'] = self.activation
+        state['bias'] = self.bias
+        state['learningRate'] = self.learningRate
+        state['outputLayer'] = dict()
+        state['outputLayer']['width'] = self.outputWidth
+        state['outputLayer']['activation'] = self.outputActivation
+
+        state['outputLayer']['weights'] = []
         return state
 
     def loadState(self,state):
@@ -355,8 +389,28 @@ class Network:
         State is defined as the weights and biases of each neuron in each layer. This will be a list of lists of lists. 
         Each layer is a list of neurons, each neuron has a list of weights and a bias.
         """
-        for layerIndex in range(len(state)):
-            thisLayerState = state[layerIndex][0]
+        layerCount = len(state['layers'])
+        neuronsPerLayerCount = len(state['layers'][0][0])
+
+        self.setBias(state['bias'])
+        self.setOutputLayer(state['outputLayer']['width'], state['outputLayer']['activation'])
+
+        self.layerCount = layerCount
+        self.neuronsPerLayerCount = neuronsPerLayerCount
+
+        if (self.isOutputSet() == False):
+            if (self.debug == True):
+                print("No output layer parameters set. Please use Network.setOutputLayer(width<int>,activation<str>) before calling Network.initialize()")
+            return False
+
+        if (self.setActivation(state['activation']) == True):
+            self._createNet(layerCount,neuronsPerLayerCount,self.activation,self.learningRate)
+        else:
+            raise TypeError (f"Neuron::isValidActivation: '{state['activation']}' is not a valid activation. Valid inputs: 'relu','sigmoid','tanh','softmax'.")
+
+        for layerIndex in range(len(state['layers'])):
+            print(f"Network:loadState(): Loading state for layer {layerIndex}")
+            thisLayerState = state['layers'][layerIndex][0]
             thisLayer = self.layers[layerIndex]
             thisLayer.loadState(thisLayerState) #TODO: Implement state loading into layer. Should use existing setWeights and setBias
 

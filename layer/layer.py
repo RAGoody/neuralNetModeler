@@ -172,6 +172,18 @@ class Layer:
             state.append(neuron_state)
         return state
 
+    def loadState(self, state):
+        """
+            Loads the state of the layer. This will allow us to load a trained model and use it for predictions without retraining.
+            State is defined as the weights and biases of each neuron in the layer. This will be a list of lists. 
+            Each neuron is a list of weights and a bias.
+        """
+        for neuronIndex in range(len(state)):
+            thisNeuronState = state[neuronIndex]
+            thisNeuron = self.neurons[neuronIndex]
+            thisNeuron.setWeights(thisNeuronState['weights'])
+            thisNeuron.setBias(thisNeuronState['bias'])
+
     def _createLayer(self,neuronsPerLayerCount,activation,learningRate):
         for i in range(neuronsPerLayerCount):
             self.neurons.append(Neuron())
