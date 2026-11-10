@@ -35,11 +35,14 @@ print(parameters.getParameters())
 
 parameters.setRequiredParameters(['input', 'model', 'columnstoignore'])
 
-stateFile = File(path="data/input", name=parameters.getParameter('model'))
+#Read and load the model from the 'model' CLI parameter. Derive the number of layers and neurons per layer from the model state file. This will be used to initialize the network.
+stateFile = File(path="data/model", name=parameters.getParameter('model'))
 print(f"Predictive mode detected. Loading latest state from {stateFile.fullPath} (expected in JSON format).")
-stateFile.read()
-networkState = json.loads(stateFile.getContents())
+networkState = json.loads(stateFile.read())
 print(f"....... Now loading state file from {stateFile.fullPath}.")
+print(networkState)
+layerCount = len(networkState)
+print(f"....... Network has {layerCount} layers.")
 
 #read our data
 inputFile = File(path="data/input",name=parameters.getParameter('input'))
@@ -57,3 +60,7 @@ neuralNetwork.setMatrix(dataMatrix)
 
 #Load the state of the network from the JSON file. This will set up the network with the correct weights and biases.
 neuralNetwork.loadState(networkState)
+
+predictions = neuralNetwork.predict()
+
+print(f"Predictions: {predictions}")

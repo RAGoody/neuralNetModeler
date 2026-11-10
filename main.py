@@ -62,7 +62,7 @@ else:
 
 #read our data
 print(f"Reading input file: {inputFile.fullPath}")
-inputFile.setColumnsToIngore([0,1])  #columns 0 and 1 are lat/long and 10 is if there's a target present.
+inputFile.setColumnsToIngore(parameters.getParameter('columnsToIgnore'))  #columns 0 and 1 are lat/long and 10 is if there's a target present.
 data = inputFile.readCSVIntoMatrix(True)
 dataMatrix = Matrix(data)
 dataMatrix.normalize()
@@ -107,9 +107,9 @@ if (key == "\x1b"):
 else:
     print("...Continuing.")
 
-neuralNetwork.process()
+neuralNetwork.learn()
 
-print(f"Processing completed")
+print(f"Learning completed")
 print("Save state? Press any key to save or 'escape' to quit.")
 key = readkey()
 if (key == "\x1b"):
